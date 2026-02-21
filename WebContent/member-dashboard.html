@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Member Dashboard - BBJ Church Manager</title>
+  <link href="lib/bootstrap/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark" style="display:none">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="member-dashboard.html"><i class="bi bi-building" style="font-size:1.2rem;margin-right:.4rem"></i> BBJ Church</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="announcements.html"><i class="bi bi-megaphone-fill"></i> Announcements</a></li>
+          <li class="nav-item"><a class="nav-link" href="events.html"><i class="bi bi-calendar-event-fill"></i> Events</a></li>
+          <li class="nav-item"><a class="nav-link" href="sermons.html"><i class="bi bi-mic-fill"></i> Sermons</a></li>
+          <li class="nav-item"><a class="nav-link" href="members.html"><i class="bi bi-people-fill"></i> Members</a></li>
+          <li class="nav-item"><a class="nav-link" href="logout"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="page-header">
+      <h1 class="mb-2"><i class="bi bi-hand-thumbs-up"></i> Welcome, <span id="memberName">Member</span></h1>
+      <p class="mb-0"><i class="bi bi-envelope-fill"></i> <strong id="memberEmail">Email</strong> | Explore church announcements, events, and more</p>
+    </div>
+
+    <div id="roleAlert"></div>
+
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-4">
+        <div class="card text-center">
+          <div style="font-size:3rem;margin-bottom:1rem"><i class="bi bi-megaphone-fill" style="font-size:3rem"></i></div>
+          <h3>Announcements</h3>
+          <p>View church announcements</p>
+          <a href="announcements.html" class="btn btn-primary btn-sm">View</a>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4">
+        <div class="card text-center">
+          <div style="font-size:3rem;margin-bottom:1rem"><i class="bi bi-calendar-event-fill" style="font-size:3rem"></i></div>
+          <h3>Events</h3>
+          <p>Discover upcoming events</p>
+          <a href="events.html" class="btn btn-primary btn-sm">View</a>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4">
+        <div class="card text-center">
+          <div style="font-size:3rem;margin-bottom:1rem"><i class="bi bi-mic-fill" style="font-size:3rem"></i></div>
+          <h3>Sermons</h3>
+          <p>Listen and download sermons</p>
+          <a href="sermons.html" class="btn btn-primary btn-sm">View</a>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4">
+        <div class="card text-center">
+          <div style="font-size:3rem;margin-bottom:1rem"><i class="bi bi-people-fill" style="font-size:3rem"></i></div>
+          <h3>Church Directory</h3>
+          <p>View other members</p>
+          <a href="members.html" class="btn btn-primary btn-sm">View</a>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4">
+        <div class="card text-center">
+          <div style="font-size:3rem;margin-bottom:1rem"><i class="bi bi-person-circle" style="font-size:3rem"></i></div>
+          <h3>My Profile</h3>
+          <p>View and edit your profile</p>
+          <a href="my-profile.html" class="btn btn-primary btn-sm">View</a>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4">
+        <div class="card text-center">
+          <div style="font-size:3rem;margin-bottom:1rem"><i class="bi bi-question-circle" style="font-size:3rem"></i></div>
+          <h3>Help</h3>
+          <p>Get support and information</p>
+          <a href="#" class="btn btn-primary btn-sm disabled">Coming Soon</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>&copy; 2026 BBJ Digital Church Manager. All rights reserved.</p>
+  </div>
+
+  <script src="lib/bootstrap/bootstrap.bundle.min.js"></script>
+  <script>
+    async function refreshMemberDashboard() {
+      const firstName = sessionStorage.getItem('firstName');
+      const email = sessionStorage.getItem('email');
+
+      if (!firstName) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      document.getElementById('memberName').textContent = firstName;
+      if (email) document.getElementById('memberEmail').textContent = email;
+
+      try {
+        const res = await fetch('member-info');
+        const info = await res.json();
+        const roleAlertDiv = document.getElementById('roleAlert');
+        if (!info || info.role !== 'admin') {
+          roleAlertDiv.innerHTML = '<div class="alert alert-info"><strong><i class="bi bi-info-circle-fill"></i> Note:</strong> You have read-only access. Contact an admin if you need to make changes.</div>';
+        } else {
+          roleAlertDiv.innerHTML = '';
+        }
+      } catch (e) {
+        document.getElementById('roleAlert').innerHTML = '<div class="alert alert-info"><strong><i class="bi bi-info-circle-fill"></i> Note:</strong> You have read-only access. Contact an admin if you need to make changes.</div>';
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', refreshMemberDashboard);
+    window.addEventListener('pageshow', refreshMemberDashboard);
+  </script>
+</body>
+</html>

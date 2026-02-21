@@ -1,0 +1,27 @@
+# Firebase Credentials - NEVER commit to version control
+firebase-credentials.json
+
+# Local development
+*.log
+*.env
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Build
+target/
+dist/
+build/
+*.class
+
+# OS
+Thumbs.db
+.DS_Store

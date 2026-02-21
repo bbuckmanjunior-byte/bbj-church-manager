@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Register - BBJ Church Manager</title>
+  <link href="lib/bootstrap/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .register-container{min-height:100vh;display:flex;align-items:center;justify-content:center}
+    .register-card{background:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.1);max-width:500px;width:100%;padding:2rem}
+    .register-header{text-align:center;margin-bottom:2rem}
+    .register-header h1{color:var(--primary);font-size:2rem;margin-bottom:0.5rem}
+    .register-header p{color:#666;margin:0}
+    .form-section{margin-bottom:1.5rem}
+    .form-section h6{color:var(--primary);font-weight:700;font-size:0.875rem;text-transform:uppercase;margin-bottom:1rem}
+    .password-strength{height:4px;background:#e9ecef;border-radius:2px;margin-top:0.5rem;overflow:hidden}
+    .password-strength-bar{height:100%;transition:all 0.3s;width:0%}
+    .text-muted-small{font-size:0.875rem;color:#999;margin-top:0.5rem}
+  </style>
+</head>
+<body class="register-container" style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);">
+  <nav style="position:fixed;top:0;left:0;right:0;background:rgba(0,0,0,0.8);padding:1rem;display:flex;justify-content:space-between;align-items:center;z-index:1000;box-shadow:0 2px 10px rgba(0,0,0,0.2)">
+    <a href="index.html" style="color:#fff;font-weight:700;text-decoration:none;font-size:1.25rem;display:flex;align-items:center;gap:0.5rem">🏢 BBJ Church</a>
+    <div style="display:flex;gap:1rem">
+      <a href="login.html" style="color:#fff;text-decoration:none;padding:0.5rem 1rem;border:2px solid #6366f1;border-radius:6px;font-weight:500">Sign In</a>
+      <a href="register.html" style="color:#fff;text-decoration:none;padding:0.5rem 1rem;background:#6366f1;border-radius:6px;font-weight:500">Sign Up</a>
+    </div>
+  </nav>
+  <div class="register-card" style="margin-top:80px">
+    <div class="register-header">
+      <h1>🏢 Church Manager</h1>
+      <p>Join Our Community</p>
+    </div>
+
+    <div id="errorAlert" style="display:none;margin-bottom:1rem"></div>
+    <div id="successAlert" style="display:none;margin-bottom:1rem"></div>
+
+    <form id="registerForm">
+      <!-- Personal Information Section -->
+      <div class="form-section">
+        <h6>Personal Information</h6>
+        <div class="mb-3">
+          <label for="firstName" class="form-label">First Name *</label>
+          <input type="text" id="firstName" name="firstName" required class="form-control" placeholder="John">
+        </div>
+        <div class="mb-3">
+          <label for="lastName" class="form-label">Last Name *</label>
+          <input type="text" id="lastName" name="lastName" required class="form-control" placeholder="Doe">
+        </div>
+        <div class="mb-3">
+          <label for="gender" class="form-label">Gender *</label>
+          <select id="gender" name="gender" required class="form-control">
+            <option value="">Select Gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Contact Information Section -->
+      <div class="form-section">
+        <h6>Contact Information</h6>
+        <div class="mb-3">
+          <label for="phone" class="form-label">Phone Number *</label>
+          <input type="tel" id="phone" name="phone" required class="form-control" placeholder="(555) 123-4567">
+        </div>
+      </div>
+
+      <!-- Account Section -->
+      <div class="form-section">
+        <h6>Account Details</h6>
+        <div class="mb-3">
+          <label for="password" class="form-label">Password *</label>
+          <input type="password" id="password" name="password" required class="form-control" placeholder="Enter a strong password">
+          <div class="password-strength">
+            <div class="password-strength-bar" id="strengthBar"></div>
+          </div>
+          <div class="text-muted-small">
+            <small>Password must be at least 8 characters</small>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label for="confirmPassword" class="form-label">Confirm Password *</label>
+          <input type="password" id="confirmPassword" name="confirmPassword" required class="form-control" placeholder="Confirm your password">
+        </div>
+      </div>
+
+      <!-- Generated Email Info -->
+      <div style="background:rgba(99,102,241,0.05);border:1px solid rgba(99,102,241,0.2);border-radius:8px;padding:1rem;margin-bottom:1rem">
+        <small style="color:#666"><strong>📧 Your generated email:</strong></small>
+        <div style="color:var(--primary);font-weight:700;margin-top:0.25rem" id="emailPreview">firstname@bbj.com</div>
+        <small style="color:#999;display:block;margin-top:0.5rem">Your email address will be automatically generated from your first name when you complete registration.</small>
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100" style="background:var(--primary);padding:0.75rem">Create Account</button>
+      
+      <div style="text-align:center;margin-top:1rem">
+        <small style="color:#666">Already have an account? <a href="login.html" style="color:var(--primary);text-decoration:none"><strong>Sign In</strong></a></small>
+      </div>
+    </form>
+  </div>
+
+  <script src="lib/bootstrap/bootstrap.bundle.min.js"></script>
+  <script>
+    // Password strength indicator
+    const passwordInput = document.getElementById('password');
+    const strengthBar = document.getElementById('strengthBar');
+    
+    passwordInput.addEventListener('input', function() {
+      let strength = 0;
+      if (this.value.length >= 8) strength += 25;
+      if (this.value.length >= 12) strength += 25;
+      if (/[a-z]/.test(this.value) && /[A-Z]/.test(this.value)) strength += 25;
+      if (/[0-9]/.test(this.value) || /[!@#$%^&*]/.test(this.value)) strength += 25;
+      
+      strengthBar.style.width = strength + '%';
+      strengthBar.style.backgroundColor = 
+        strength < 25 ? '#dc3545' : 
+        strength < 50 ? '#fd7e14' : 
+        strength < 75 ? '#ffc107' : '#28a745';
+    });
+
+    // Update email preview as user types first name
+    const firstNameInput = document.getElementById('firstName');
+    const emailPreview = document.getElementById('emailPreview');
+    
+    firstNameInput.addEventListener('input', function() {
+      if (this.value.trim()) {
+        emailPreview.textContent = this.value.toLowerCase() + '@bbj.com';
+      } else {
+        emailPreview.textContent = 'firstname@bbj.com';
+      }
+    });
+
+    // Form submission
+    document.getElementById('registerForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const errorAlert = document.getElementById('errorAlert');
+      const successAlert = document.getElementById('successAlert');
+      errorAlert.style.display = 'none';
+      successAlert.style.display = 'none';
+
+      // Validation
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      if (password !== confirmPassword) {
+        errorAlert.innerHTML = '<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>Error:</strong> Passwords do not match.<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
+        errorAlert.style.display = 'block';
+        return;
+      }
+
+      if (password.length < 8) {
+        errorAlert.innerHTML = '<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>Error:</strong> Password must be at least 8 characters.<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
+        errorAlert.style.display = 'block';
+        return;
+      }
+
+      // Submit registration
+      const formData = new FormData(this);
+      const urlParams = new URLSearchParams(formData);
+      console.log('Submitting registration with data:', Object.fromEntries(formData.entries()));
+      try {
+        const response = await fetch('register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: urlParams.toString()
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          successAlert.innerHTML = `<div class="alert alert-success alert-dismissible fade show" role="alert">
+            <strong>Registration Successful!</strong><br>
+            Account created for <strong>${data.email}</strong><br>
+            <small>Redirecting to login...</small>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>`;
+          successAlert.style.display = 'block';
+          
+          setTimeout(() => {
+            window.location.href = 'login.html';
+          }, 2000);
+        } else {
+          const error = await response.json();
+          errorAlert.innerHTML = `<div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>Registration Failed:</strong> ${error.message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>`;
+          errorAlert.style.display = 'block';
+        }
+      } catch (error) {
+        errorAlert.innerHTML = `<div class="alert alert-danger alert-dismissible fade show" role="alert">
+          <strong>Error:</strong> ${error.message}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>`;
+        errorAlert.style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin Management - BBJ Church Manager</title>
+  <link href="lib/bootstrap/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .admin-container { max-width: 900px; margin: 2rem auto; }
+    .admin-table { margin-top: 2rem; }
+    .form-section { background: var(--light); padding: 2rem; border-radius: 8px; margin-bottom: 2rem; }
+  </style>
+</head>
+<body>
+  <nav id="navbar" class="navbar navbar-expand-lg navbar-dark"></nav>
+
+  <div class="container admin-container">
+    <div class="page-header">
+      <h1><i class="bi bi-shield-check"></i> Admin Management</h1>
+      <p>Create and manage admin accounts</p>
+    </div>
+
+    <div class="form-section">
+      <h3>Create New Admin</h3>
+      <form id="createAdminForm">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="email">Email Address *</label>
+            <input type="email" id="email" class="form-control" placeholder="admin@example.com" required>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="username">Username *</label>
+            <input type="text" id="username" class="form-control" placeholder="admin_username" required>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="firstName">First Name *</label>
+            <input type="text" id="firstName" class="form-control" placeholder="First Name" required>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="lastName">Last Name *</label>
+            <input type="text" id="lastName" class="form-control" placeholder="Last Name" required>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="password">Password *</label>
+            <input type="password" id="password" class="form-control" placeholder="Temporary password" required>
+            <small class="form-text text-muted">Admin will be asked to change this on first login</small>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" class="form-control" placeholder="Phone">
+          </div>
+        </div>
+        <button type="submit" class="btn btn-success"><i class="bi bi-plus-circle"></i> Create Admin</button>
+      </form>
+      <div id="createAlert"></div>
+    </div>
+
+    <div class="admin-table">
+      <h3><i class="bi bi-people-fill"></i> Current Admins</h3>
+      <div id="adminsList" class="card">
+        <div class="card-body text-center">
+          <p class="text-muted">Loading admins...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>&copy; 2026 BBJ Digital Church Manager. All rights reserved.</p>
+  </div>
+
+  <script src="lib/bootstrap/bootstrap.bundle.min.js"></script>
+  <script>
+    // Check if user is admin
+    window.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const response = await fetch('member-info');
+        const data = await response.json();
+        
+        if (data.role !== 'admin') {
+          document.body.innerHTML = `
+            <div class="alert alert-danger" style="margin: 2rem;">
+              <h4>Access Denied</h4>
+              <p>Only admins can access the Admin Management page.</p>
+              <a href="admin-dashboard.html" class="btn btn-primary">Back to Dashboard</a>
+            </div>
+          `;
+          return;
+        }
+
+        // Load navigation for admin
+        loadNavigation();
+        loadAdmins();
+      } catch (e) {
+        console.error('Error checking permissions:', e);
+      }
+    });
+
+    // Handle form submission
+    document.getElementById('createAdminForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const formData = {
+        email: document.getElementById('email').value.trim(),
+        username: document.getElementById('username').value.trim(),
+        first_name: document.getElementById('firstName').value.trim(),
+        last_name: document.getElementById('lastName').value.trim(),
+        password: document.getElementById('password').value,
+        phone: document.getElementById('phone').value.trim()
+      };
+
+      if (!formData.email || !formData.username || !formData.first_name || !formData.last_name || !formData.password) {
+        showAlert('All required fields must be filled', 'danger');
+        return;
+      }
+
+      try {
+        const response = await fetch('admin-management', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'create', ...formData })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          showAlert('✓ Admin created successfully', 'success');
+          document.getElementById('createAdminForm').reset();
+          await loadAdmins();
+        } else {
+          showAlert('✗ Error: ' + (data.error || 'Unknown error'), 'danger');
+        }
+      } catch (e) {
+        showAlert('✗ Error: ' + e.message, 'danger');
+      }
+    });
+
+    async function loadAdmins() {
+      try {
+        const response = await fetch('admin-management?action=list');
+        const data = await response.json();
+
+        const container = document.getElementById('adminsList');
+
+        if (data.admins && data.admins.length > 0) {
+          let html = `
+            <table class="table table-striped table-hover mb-0">
+              <thead class="table-dark">
+                <tr>
+                  <th>Email</th>
+                  <th>Name</th>
+                  <th>Username</th>
+                  <th>Created</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+          `;
+
+          data.admins.forEach(admin => {
+            const created = new Date(admin.created_at).toLocaleDateString();
+            html += `
+              <tr>
+                <td>${escapeHtml(admin.email)}</td>
+                <td>${escapeHtml(admin.first_name)} ${escapeHtml(admin.last_name)}</td>
+                <td>${escapeHtml(admin.username)}</td>
+                <td>${created}</td>
+                <td>
+                  ${admin.id !== parseInt(localStorage.getItem('userId')) ? 
+                    `<button onclick="removeAdmin(${admin.id})" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i> Remove</button>` 
+                    : '<span class="badge bg-secondary">Current User</span>'}
+                </td>
+              </tr>
+            `;
+          });
+
+          html += `
+              </tbody>
+            </table>
+          `;
+          container.innerHTML = html;
+        } else {
+          container.innerHTML = '<div class="card-body text-center"><p class="text-muted">No admins found</p></div>';
+        }
+      } catch (e) {
+        console.error('Error loading admins:', e);
+        document.getElementById('adminsList').innerHTML = '<div class="alert alert-danger">Failed to load admins</div>';
+      }
+    }
+
+    async function removeAdmin(adminId) {
+      if (!confirm('Are you sure you want to remove this admin? This action cannot be undone.')) {
+        return;
+      }
+
+      try {
+        const response = await fetch('admin-management', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'remove', admin_id: adminId })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          showAlert('✓ Admin removed successfully', 'success');
+          await loadAdmins();
+        } else {
+          showAlert('✗ Error: ' + (data.error || 'Unknown error'), 'danger');
+        }
+      } catch (e) {
+        showAlert('✗ Error: ' + e.message, 'danger');
+      }
+    }
+
+    function showAlert(message, type) {
+      const alertDiv = document.getElementById('createAlert');
+      alertDiv.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show" role="alert" style="margin-top: 1rem;">
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>`;
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+      return text.replace(/[&<>"']/g, m => map[m]);
+    }
+
+    async function loadNavigation() {
+      try {
+        const response = await fetch('tabs?action=list');
+        const data = await response.json();
+
+        if (data.tabs) {
+          let navHtml = `
+            <div class="container-fluid">
+              <a class="navbar-brand" href="admin-dashboard.html"><i class="bi bi-building"></i> BBJ Church</a>
+              <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+              </button>
+              <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                  <li class="nav-item"><a class="nav-link" href="admin-dashboard.html"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+                  <li class="nav-item"><a class="nav-link active" href="admin-management.html"><i class="bi bi-shield-check"></i> Admin Mgmt</a></li>
+                  <li class="nav-item"><a class="nav-link" href="logout"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+                </ul>
+              </div>
+            </div>
+          `;
+
+          document.getElementById('navbar').innerHTML = navHtml;
+        }
+      } catch (e) {
+        console.log('Could not load navigation:', e.message);
+      }
+    }
+
+    // Store user ID on page load (would normally come from session)
+    fetch('member-info').then(r => r.json()).then(j => {
+      if (j.userId) {
+        localStorage.setItem('userId', j.userId);
+      }
+    });
+  </script>
+</body>
+</html>

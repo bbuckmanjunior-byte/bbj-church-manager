@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sermons - BBJ Church Manager</title>
+  <link href="lib/bootstrap/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="member-dashboard.html"><i class="bi bi-building"></i> BBJ Church</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="announcements.html"><i class="bi bi-megaphone-fill"></i> Announcements</a></li>
+          <li class="nav-item"><a class="nav-link" href="events.html"><i class="bi bi-calendar-event-fill"></i> Events</a></li>
+          <li class="nav-item"><a class="nav-link active" href="sermons.html"><i class="bi bi-mic-fill"></i> Sermons</a></li>
+          <li class="nav-item"><a class="nav-link" href="members.html"><i class="bi bi-people-fill"></i> Members</a></li>
+          <li class="nav-item"><a class="nav-link" href="logout"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="page-header">
+      <h1>🎙️ Sermons</h1>
+    </div>
+
+    <div class="row mb-4" id="adminControls" style="display:none">
+      <div class="col-12">
+        <a href="upload-sermon.html" class="btn btn-primary">+ Upload Sermon</a>
+        <a href="admin-dashboard.html" class="btn btn-outline">← Back to Admin Dashboard</a>
+      </div>
+    </div>
+
+    <div id="sermonsList" class="card-grid">
+      <div class="card text-center" style="grid-column:1/-1">
+        <div class="loading">Loading sermons</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>&copy; 2026 BBJ Digital Church Manager. All rights reserved.</p>
+  </div>
+
+  <script src="lib/bootstrap/bootstrap.bundle.min.js"></script>
+  <script>
+    let userRole = 'member';
+    
+    // Load sermons on page load
+    loadSermons();
+
+    function loadSermons() {
+      fetch('sermons?action=list')
+        .then(r => r.json())
+        .then(data => {
+          // Get user role
+          fetch('member-info').then(r => r.json()).then(j => {
+            if (j.role) userRole = j.role;
+            if (userRole === 'admin') {
+              document.getElementById('adminControls').style.display = 'block';
+            }
+          }).catch(e => console.log('Could not fetch role'));
+          
+          if (data.sermons && data.sermons.length > 0) {
+            const container = document.getElementById('sermonsList');
+            container.innerHTML = data.sermons.map(sermon => {
+              const fileSize = (sermon.file_size / (1024 * 1024)).toFixed(2);
+              const date = new Date(sermon.created_at).toLocaleDateString();
+              return `
+                <div class="card">
+                  <h3>🎙️ ${sermon.title}</h3>
+                  <p>${sermon.description}</p>
+                  <div style="background:var(--light);padding:0.75rem;border-radius:6px;margin:1rem 0">
+                    <small style="color:#666">
+                      📅 ${date} • 💾 ${fileSize} MB • 📁 ${sermon.file_type}
+                    </small>
+                  </div>
+                  <div>
+                    <button class="btn btn-primary btn-sm" onclick="playSermon('${sermon.file_path}')">▶️ Play</button>
+                    <a href="${sermon.file_path}" download class="btn btn-secondary btn-sm">⬇️ Download</a>
+                    ${userRole === 'admin' ? `<button onclick="deleteSermon(${sermon.id})" class="btn btn-danger btn-sm">🗑️ Delete</button>` : ''}
+                  </div>
+                </div>
+              `;
+            }).join('');
+          } else {
+            document.getElementById('sermonsList').innerHTML = '<div class="card" style="grid-column:1/-1"><div style="text-align:center;color:#999;padding:2rem">No sermons available yet</div></div>';
+          }
+        })
+        .catch(e => {
+          console.error(e);
+          document.getElementById('sermonsList').innerHTML = '<div class="card alert alert-danger" style="grid-column:1/-1">Failed to load sermons</div>';
+        });
+    }
+
+    function playSermon(filePath) {
+      alert('Playing: ' + filePath + '\n\nIn a full implementation, this would open an audio player.');
+    }
+    
+    function deleteSermon(id) {
+      if (confirm('Are you sure you want to delete this sermon?')) {
+        fetch('sermons', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+          body: `action=delete&id=${id}`
+        }).then(r => r.json()).then(j => {
+          if (j.success) {
+            alert('✓ Sermon deleted');
+            location.reload();
+          } else {
+            alert('✗ Error: ' + (j.error || 'Unknown error'));
+          }
+        }).catch(e => alert('✗ Error: ' + e.message));
+      }
+    }
+  </script>
+</body>
+</html>

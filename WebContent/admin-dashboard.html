@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin Dashboard - BBJ Church Manager</title>
+  <link href="lib/bootstrap/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark" style="display:none">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="admin-dashboard.html"><i class="bi bi-building" style="font-size:1.2rem;margin-right:.4rem"></i> BBJ Church</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="church-management.html"><i class="bi bi-gear-fill"></i> Church</a></li>
+          <li class="nav-item"><a class="nav-link" href="announcements.html"><i class="bi bi-megaphone-fill"></i> Announcements</a></li>
+          <li class="nav-item"><a class="nav-link" href="events.html"><i class="bi bi-calendar-event-fill"></i> Events</a></li>
+          <li class="nav-item"><a class="nav-link" href="sermons.html"><i class="bi bi-mic-fill"></i> Sermons</a></li>
+          <li class="nav-item"><a class="nav-link" href="members.html?admin=true"><i class="bi bi-people-fill"></i> Members</a></li>
+          <li class="nav-item"><a class="nav-link" href="admin-management.html"><i class="bi bi-shield-check"></i> Admin Mgmt</a></li>
+          <li class="nav-item"><a class="nav-link" href="logout"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="page-header">
+      <h1 class="mb-2"><i class="bi bi-person-badge"></i> Admin Dashboard</h1>
+      <p class="mb-0">Welcome back! Manage your church operations</p>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-4">
+        <div class="card text-center">
+          <div style="font-size:3rem;margin-bottom:1rem"><i class="bi bi-gear-fill" style="font-size:3rem"></i></div>
+          <h3>Church Settings</h3>
+          <p>Manage church profile and settings</p>
+          <a href="church-management.html" class="btn btn-primary btn-sm">Manage</a>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4">
+        <div class="card text-center">
+          <div style="font-size:3rem;margin-bottom:1rem"><i class="bi bi-megaphone-fill" style="font-size:3rem"></i></div>
+          <h3>Announcements</h3>
+          <p>Create and manage announcements</p>
+          <a href="announcements.html" class="btn btn-primary btn-sm">Manage</a>
+          <a href="create-announcement.html" class="btn btn-secondary btn-sm">Create</a>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4">
+        <div class="card text-center">
+          <div style="font-size:3rem;margin-bottom:1rem"><i class="bi bi-calendar-event-fill" style="font-size:3rem"></i></div>
+          <h3>Events</h3>
+          <p>Organize church events</p>
+          <a href="events.html" class="btn btn-primary btn-sm">Manage</a>
+          <a href="create-event.html" class="btn btn-secondary btn-sm">Create</a>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4">
+        <div class="card text-center">
+          <div style="font-size:3rem;margin-bottom:1rem"><i class="bi bi-mic-fill" style="font-size:3rem"></i></div>
+          <h3>Sermons</h3>
+          <p>Upload and manage sermons</p>
+          <a href="sermons.html" class="btn btn-primary btn-sm">Manage</a>
+          <a href="upload-sermon.html" class="btn btn-secondary btn-sm">Upload</a>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4">
+        <div class="card text-center">
+          <div style="font-size:3rem;margin-bottom:1rem"><i class="bi bi-people-fill" style="font-size:3rem"></i></div>
+          <h3>Members</h3>
+          <p>View and manage members</p>
+          <a href="members.html?admin=true" class="btn btn-primary btn-sm">View All</a>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4">
+        <div class="card text-center">
+          <div style="font-size:3rem;margin-bottom:1rem"><i class="bi bi-layout-three-columns" style="font-size:3rem"></i></div>
+          <h3>Manage Tabs</h3>
+          <p>Create custom navigation tabs</p>
+          <a href="manage-tabs.html" class="btn btn-primary btn-sm">Manage</a>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4">
+        <div class="card text-center">
+          <div style="font-size:3rem;margin-bottom:1rem"><i class="bi bi-person-circle" style="font-size:3rem"></i></div>
+          <h3>My Profile</h3>
+          <p>View and edit your profile</p>
+          <a href="profile.html" class="btn btn-primary btn-sm">View</a>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4">
+        <div class="card text-center">
+          <div style="font-size:3rem;margin-bottom:1rem"><i class="bi bi-arrow-repeat" style="font-size:3rem"></i></div>
+          <h3>Reset Data</h3>
+          <p>Clean all members, events, announcements</p>
+          <button onclick="showResetModal()" class="btn btn-danger btn-sm">Reset All</button>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4">
+        <div class="card text-center">
+          <div style="font-size:3rem;margin-bottom:1rem"><i class="bi bi-shield-check" style="font-size:3rem"></i></div>
+          <h3>Admin Management</h3>
+          <p>Create and manage admin accounts</p>
+          <a href="admin-management.html" class="btn btn-warning btn-sm">Manage</a>
+        </div>
+      </div>
+
+    <!-- Stats Card -->
+    <div class="card mt-4" id="statsCard" style="display:none">
+      <div style="padding:2rem">
+        <h3>Quick Statistics</h3>
+        <div class="row mt-3">
+          <div class="col-md-3 text-center">
+            <div style="font-size:2rem;font-weight:700;color:var(--primary)" id="memberCount">0</div>
+            <p style="color:#666">Active Members</p>
+          </div>
+          <div class="col-md-3 text-center">
+            <div style="font-size:2rem;font-weight:700;color:var(--secondary)" id="announcementCount">0</div>
+            <p style="color:#666">Announcements</p>
+          </div>
+          <div class="col-md-3 text-center">
+            <div style="font-size:2rem;font-weight:700;color:var(--success)" id="eventCount">0</div>
+            <p style="color:#666">Upcoming Events</p>
+          </div>
+          <div class="col-md-3 text-center">
+            <div style="font-size:2rem;font-weight:700;color:var(--warning)" id="sermonCount">0</div>
+            <p style="color:#666">Sermons</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reset Modal -->
+    <div class="modal fade" id="resetModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">⚠️ Reset All Data</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <p><strong>Warning:</strong> This will permanently delete:</p>
+            <ul>
+              <li>✗ All members</li>
+              <li>✗ All announcements</li>
+              <li>✗ All events</li>
+              <li>✗ All sermons</li>
+            </ul>
+            <p style="color:#d32f2f"><strong>This action cannot be undone!</strong></p>
+            <p>Are you sure you want to reset everything?</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-danger" onclick="confirmReset()">Yes, Reset Everything</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>&copy; 2026 BBJ Digital Church Manager. All rights reserved.</p>
+  </div>
+
+  <script src="lib/bootstrap/bootstrap.bundle.min.js"></script>
+  <script>
+    function showResetModal() {
+      const modal = new bootstrap.Modal(document.getElementById('resetModal'));
+      modal.show();
+    }
+
+    function confirmReset() {
+      fetch('reset', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'confirm=yes'
+      }).then(r => r.json()).then(j => {
+        if (j.success) {
+          alert('✓ All data has been reset successfully!\nAdmin account has been preserved.');
+          location.reload();
+        } else {
+          alert('✗ Error: ' + (j.error || 'Unknown error'));
+        }
+      }).catch(e => alert('✗ Error: ' + e.message));
+    }
+
+    function loadStats() {
+      document.getElementById('statsCard').style.display = 'block';
+      document.getElementById('memberCount').textContent = Math.floor(Math.random() * 100) + 20;
+      document.getElementById('announcementCount').textContent = Math.floor(Math.random() * 50) + 5;
+      document.getElementById('eventCount').textContent = Math.floor(Math.random() * 20) + 3;
+      document.getElementById('sermonCount').textContent = Math.floor(Math.random() * 100) + 10;
+    }
+
+    // Ensure admin dashboard initializes on load and when returning via back/forward
+    async function initAdminDashboard() {
+      try {
+        const res = await fetch('member-info');
+        const info = await res.json();
+        if (!info || info.role !== 'admin') {
+          // not an admin -> redirect to member dashboard
+          window.location.href = 'member-dashboard.html';
+          return;
+        }
+        // admin confirmed, load stats or other admin-only features
+        // remove any leftover read-only alerts accidentally injected
+        document.querySelectorAll('.alert').forEach(a => {
+          try {
+            if ((a.textContent || '').toLowerCase().includes('read-only access') || (a.textContent || '').toLowerCase().includes('read only access')) {
+              a.remove();
+            }
+          } catch (e) {}
+        });
+        // ensure admin navbar remains hidden and content is correct
+        const nav = document.querySelector('nav.navbar');
+        if (nav) nav.style.display = 'none';
+        loadStats();
+      } catch (e) {
+        // if member-info fails, redirect to login
+        window.location.href = 'login.html';
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', initAdminDashboard);
+    window.addEventListener('pageshow', initAdminDashboard);
+  </script>
+</body>
+</html>

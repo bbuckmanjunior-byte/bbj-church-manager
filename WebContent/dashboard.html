@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard - BBJ Church Manager</title>
+  <link href="lib/bootstrap/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="dashboard.html">🏢 Church Manager</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link active" href="announcements.html">📢 Announcements</a></li>
+          <li class="nav-item"><a class="nav-link" href="events.html">📅 Events</a></li>
+          <li class="nav-item"><a class="nav-link" href="logout">🚪 Logout</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="page-header">
+      <h1 class="mb-2">📊 Dashboard</h1>
+      <p class="mb-0">Welcome to your Church Management System</p>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-4">
+        <div class="card text-center">
+          <div style="font-size:3rem;margin-bottom:1rem">📢</div>
+          <h3>Announcements</h3>
+          <p>Manage and view church announcements</p>
+          <a href="announcements.html" class="btn btn-primary btn-sm">View</a>
+          <a href="create-announcement.html" class="btn btn-secondary btn-sm">Create New</a>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4">
+        <div class="card text-center">
+          <div style="font-size:3rem;margin-bottom:1rem">📅</div>
+          <h3>Events</h3>
+          <p>Manage church events and schedules</p>
+          <a href="events.html" class="btn btn-primary btn-sm">View</a>
+          <a href="create-event.html" class="btn btn-secondary btn-sm">Create New</a>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4">
+        <div class="card text-center">
+          <div style="font-size:3rem;margin-bottom:1rem">👥</div>
+          <h3>Members</h3>
+          <p>View and manage church members</p>
+          <a href="members.html" class="btn btn-primary btn-sm">View</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>&copy; 2026 BBJ Digital Church Manager. All rights reserved.</p>
+  </div>
+
+  <script src="lib/bootstrap/bootstrap.bundle.min.js"></script>
+  <script>
+    // Redirect to appropriate dashboard based on user role
+    (async function() {
+      try {
+        const res = await fetch('member-info');
+        const info = await res.json();
+        if (info && info.userId) {
+          if (info.role === 'admin') {
+            window.location.replace('admin-dashboard.html');
+          } else {
+            window.location.replace('member-dashboard.html');
+          }
+        } else {
+          window.location.replace('login.html');
+        }
+      } catch (e) {
+        window.location.replace('login.html');
+      }
+    })();
+  </script>
+</body>
+</html>

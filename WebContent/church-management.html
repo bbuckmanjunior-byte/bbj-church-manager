@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Church Management - BBJ Church Manager</title>
+  <link href="lib/bootstrap/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="admin-dashboard.html"><i class="bi bi-building"></i> BBJ Church</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link active" href="church-management.html"><i class="bi bi-gear-fill"></i> Church</a></li>
+          <li class="nav-item"><a class="nav-link" href="announcements.html"><i class="bi bi-megaphone-fill"></i> Announcements</a></li>
+          <li class="nav-item"><a class="nav-link" href="events.html"><i class="bi bi-calendar-event-fill"></i> Events</a></li>
+          <li class="nav-item"><a class="nav-link" href="sermons.html"><i class="bi bi-mic-fill"></i> Sermons</a></li>
+          <li class="nav-item"><a class="nav-link" href="members.html?admin=true"><i class="bi bi-people-fill"></i> Members</a></li>
+          <li class="nav-item"><a class="nav-link" href="logout">🚪 Logout</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="page-header">
+      <h1 class="mb-2">⚙️ Church Management</h1>
+      <p class="mb-0">Manage church profile, settings, and configuration</p>
+    </div>
+
+    <div class="row g-4">
+      <!-- Church Profile Card -->
+      <div class="col-lg-8">
+        <div class="card">
+          <h3>Church Profile</h3>
+          <form id="churchForm">
+            <div class="form-group">
+              <label for="churchName">Church Name</label>
+              <input type="text" id="churchName" name="churchName" class="form-control" value="BBJ Digital Church" required>
+            </div>
+            <div class="form-group">
+              <label for="churchEmail">Contact Email</label>
+              <input type="email" id="churchEmail" name="churchEmail" class="form-control" value="admin@bbj.com" required>
+            </div>
+            <div class="form-group">
+              <label for="churchPhone">Phone Number</label>
+              <input type="tel" id="churchPhone" name="churchPhone" class="form-control" placeholder="+1 (555) 000-0000">
+            </div>
+            <div class="form-group">
+              <label for="churchAddress">Address</label>
+              <input type="text" id="churchAddress" name="churchAddress" class="form-control" placeholder="123 Main St, City, State 12345">
+            </div>
+            <div class="form-group">
+              <label for="churchDescription">Church Description</label>
+              <textarea id="churchDescription" name="churchDescription" class="form-control" placeholder="Brief description of your church..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Quick Settings Sidebar -->
+      <div class="col-lg-4">
+        <div class="card">
+          <h3>Quick Settings</h3>
+          <div class="form-group" style="margin-bottom: 1.5rem;">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="allowRegistration" checked>
+              <label class="form-check-label" for="allowRegistration">
+                Allow New Registrations
+              </label>
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom: 1.5rem;">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="requireApproval" checked>
+              <label class="form-check-label" for="requireApproval">
+                Require Admin Approval for Members
+              </label>
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom: 1.5rem;">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="enableAnnouncements" checked>
+              <label class="form-check-label" for="enableAnnouncements">
+                Enable Announcements
+              </label>
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom: 1.5rem;">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="enableSermons" checked>
+              <label class="form-check-label" for="enableSermons">
+                Enable Sermons
+              </label>
+            </div>
+          </div>
+          <button onclick="saveSettings()" class="btn btn-success btn-block" style="width: 100%; display: block;">Save Settings</button>
+        </div>
+
+        <!-- Statistics Card -->
+        <div class="card" style="margin-top: 1rem;">
+          <h3>Statistics</h3>
+          <div style="padding: 1rem 0;">
+            <div style="margin-bottom: 1rem;">
+              <small style="color: #666;">Total Members</small>
+              <div style="font-size: 2rem; font-weight: 700; color: #6366f1;" id="memberCount">0</div>
+            </div>
+            <div style="margin-bottom: 1rem;">
+              <small style="color: #666;">Pending Approvals</small>
+              <div style="font-size: 2rem; font-weight: 700; color: #f59e0b;" id="pendingCount">0</div>
+            </div>
+            <div style="margin-bottom: 1rem;">
+              <small style="color: #666;">Active Events</small>
+              <div style="font-size: 2rem; font-weight: 700; color: #10b981;" id="eventCount">0</div>
+            </div>
+            <div>
+              <small style="color: #666;">Total Sermons</small>
+              <div style="font-size: 2rem; font-weight: 700; color: #8b5cf6;" id="sermonCount">0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Additional Settings Section -->
+    <div class="card" style="margin-top: 2rem;">
+      <h3>Advanced Settings</h3>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label>Member Directory Privacy</label>
+          <select class="form-control">
+            <option>Public - All members can view</option>
+            <option selected>Members Only - Logged in members only</option>
+            <option>Admin Only</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label>Event Visibility</label>
+          <select class="form-control">
+            <option selected>Public - Anyone can view</option>
+            <option>Members Only</option>
+            <option>Admin Only</option>
+          </select>
+        </div>
+      </div>
+      <button onclick="saveAdvanced()" class="btn btn-primary" style="margin-top: 1rem;">Save Advanced Settings</button>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>&copy; 2026 BBJ Digital Church Manager. All rights reserved.</p>
+  </div>
+
+  <script src="lib/bootstrap/bootstrap.bundle.min.js"></script>
+  <script>
+    // Load settings on page load
+    loadSettings();
+
+    function loadSettings() {
+      // In a real app, fetch from API
+      document.getElementById('memberCount').textContent = Math.floor(Math.random() * 50) + 10;
+      document.getElementById('pendingCount').textContent = Math.floor(Math.random() * 5) + 1;
+      document.getElementById('eventCount').textContent = Math.floor(Math.random() * 8) + 2;
+      document.getElementById('sermonCount').textContent = Math.floor(Math.random() * 30) + 5;
+    }
+
+    document.getElementById('churchForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      alert('Church profile updated successfully!');
+      // In a real app, send to API
+    });
+
+    function saveSettings() {
+      const settings = {
+        allowRegistration: document.getElementById('allowRegistration').checked,
+        requireApproval: document.getElementById('requireApproval').checked,
+        enableAnnouncements: document.getElementById('enableAnnouncements').checked,
+        enableSermons: document.getElementById('enableSermons').checked
+      };
+      console.log('Saving settings:', settings);
+      alert('Settings saved successfully!');
+      // In a real app, send to API
+    }
+
+    function saveAdvanced() {
+      alert('Advanced settings saved successfully!');
+      // In a real app, send to API
+    }
+  </script>
+</body>
+</html>

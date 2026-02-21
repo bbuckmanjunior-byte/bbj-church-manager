@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Complete Profile - BBJ Church Manager</title>
+  <link href="lib/bootstrap/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .profile-container{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem 0}
+    .profile-card{background:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.1);max-width:600px;width:100%;padding:3rem}
+    .profile-header{text-align:center;margin-bottom:2rem}
+    .profile-header h1{color:var(--primary);font-size:2rem;margin-bottom:0.5rem}
+    .profile-header p{color:#666;margin:0}
+    .success-modal{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:1000;background:#fff;border-radius:16px;padding:2rem;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.2);min-width:400px}
+    .success-modal.show{display:block}
+    .overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:999}
+    .overlay.show{display:block}
+  </style>
+</head>
+<body style="background:linear-gradient(135deg,#f5f7fa 0%,#f0f4f8 100%);">
+  <div class="profile-container">
+    <div class="profile-card">
+      <div class="profile-header">
+        <h1>📋 Complete Your Profile</h1>
+        <p>Help us know more about you</p>
+      </div>
+
+      <form id="profileForm">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="firstName">First Name *</label>
+              <input type="text" id="firstName" name="firstName" required class="form-control" placeholder="Your first name">
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="lastName">Last Name *</label>
+              <input type="text" id="lastName" name="lastName" required class="form-control" placeholder="Your last name">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="phone">Phone Number *</label>
+          <input type="tel" id="phone" name="phone" required class="form-control" placeholder="(123) 456-7890">
+        </div>
+
+        <div class="form-group">
+          <label for="address">Address *</label>
+          <input type="text" id="address" name="address" required class="form-control" placeholder="Street address">
+        </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="city">City *</label>
+              <input type="text" id="city" name="city" required class="form-control" placeholder="City">
+            </div>
+          </div>
+        <button type="submit" class="btn btn-primary btn-block mt-4" style="width:100%;background:var(--primary)">
+          ✓ Complete Profile
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Success Modal -->
+  <div class="overlay" id="overlay"></div>
+  <div class="success-modal" id="successModal">
+    <div style="font-size:3rem;margin-bottom:1rem">✅</div>
+    <h2 style="color:var(--primary);margin-bottom:1rem">Profile Complete!</h2>
+    <p style="font-size:1rem;margin-bottom:1.5rem">Your login email has been generated:</p>
+    <div style="background:var(--light);padding:1rem;border-radius:8px;margin-bottom:1.5rem;border:2px solid var(--primary)">
+      <p style="font-size:0.9rem;color:#666;margin:0.25rem 0">Your Login Email:</p>
+      <p id="generatedEmail" style="font-size:1.5rem;font-weight:700;color:var(--primary);margin:0;word-break:break-all"></p>
+    </div>
+    <p style="color:#666;margin-bottom:1.5rem;font-size:0.95rem">
+      <strong>Welcome!</strong> This is your login email for future sessions. Use this email along with your password to login next time.
+    </p>
+    <button onclick="window.location.href='member-dashboard.html'" class="btn btn-primary" style="background:var(--primary)">
+      Go to Dashboard
+    </button>
+  </div>
+
+  <script src="lib/bootstrap/bootstrap.bundle.min.js"></script>
+  <script>
+    document.getElementById('profileForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(this);
+      formData.append('action', 'complete');
+      
+      try {
+        const response = await fetch('member-profile', {
+          method: 'POST',
+          body: formData
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+          document.getElementById('generatedEmail').textContent = data.generatedEmail;
+          document.getElementById('overlay').classList.add('show');
+          document.getElementById('successModal').classList.add('show');
+        } else {
+          alert('Error: ' + (data.error || 'Failed to save profile'));
+        }
+      } catch (error) {
+        alert('Error: ' + error.message);
+      }
+    });
+  </script>
+
+  <div class="footer">
+    <p>&copy; 2026 BBJ Digital Church Manager. All rights reserved.</p>
+  </div>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BBJ Church Manager</title>
+  <link href="lib/bootstrap/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .hero{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%)}
+    .hero-content{text-align:center;color:#fff}
+    .hero h1{font-size:3rem;font-weight:700;margin-bottom:1rem;text-shadow:0 2px 10px rgba(0,0,0,0.2)}
+    .hero p{font-size:1.25rem;margin-bottom:2rem;opacity:0.95}
+    .hero .btn{padding:1rem 2.5rem;font-size:1.1rem;margin:0.5rem}
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <div class="hero-content">
+      <h1>🏢 Church Manager</h1>
+      <p>Digital Management for Your Church Community</p>
+      <div>
+        <a href="login.html" class="btn btn-outline-light" style="font-weight:600">Sign In</a>
+        <a href="register.html" class="btn btn-outline-light" style="font-weight:600">Sign Up</a>
+        <button onclick="showAbout()" class="btn btn-outline-light" style="font-weight:600">Learn More</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- About Modal -->
+  <div class="modal fade" id="aboutModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">🏢 About Church Manager</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="aboutModal"></button>
+        </div>
+        <div class="modal-body">
+          <h6 style="color:var(--primary);font-weight:700;margin-top:1.5rem">What is Church Manager?</h6>
+          <p>Church Manager is a comprehensive digital platform designed to streamline church operations and enhance member engagement. It provides a centralized system for managing announcements, events, sermons, and member information.</p>
+
+          <h6 style="color:var(--primary);font-weight:700;margin-top:1.5rem">Key Features</h6>
+          <ul style="line-height:1.8">
+            <li><strong>📢 Announcements:</strong> Keep your congregation informed with timely updates</li>
+            <li><strong>📅 Events:</strong> Organize and manage church events and activities</li>
+            <li><strong>🎙️ Sermons:</strong> Share and access sermon recordings and files</li>
+            <li><strong>👥 Member Directory:</strong> View church members with contact information</li>
+            <li><strong>👤 Member Profiles:</strong> Complete your profile with automatic email generation</li>
+            <li><strong>👨‍💼 Admin Dashboard:</strong> Full access to manage all church content</li>
+          </ul>
+
+          <h6 style="color:var(--primary);font-weight:700;margin-top:1.5rem">User Roles</h6>
+          <p><strong>Admins:</strong> Full access to create and manage all content.</p>
+          <p><strong>Members:</strong> Can view announcements, events, sermons, and connect with other members through the directory.</p>
+
+          <h6 style="color:var(--primary);font-weight:700;margin-top:1.5rem">How It Works</h6>
+          <ol style="line-height:1.8">
+            <li>Members join by signing up and completing their profile</li>
+            <li>An automatic email is generated based on your first name (firstname@bbj.com)</li>
+            <li>View all church content in a user-friendly interface</li>
+            <li>Admins manage all content and ensure the community stays connected</li>
+          </ol>
+
+          <h6 style="color:var(--primary);font-weight:700;margin-top:1.5rem">Our Mission</h6>
+          <p>To strengthen our church community by providing an easy-to-use platform that keeps members connected, informed, and engaged in our faith journey together.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-bs-dismiss="aboutModal" onclick="document.location='login.html'">Get Started</button>
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="aboutModal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer">
+    <p>&copy; 2026 BBJ Digital Church Manager. All rights reserved.</p>
+  </div>
+  <script src="lib/bootstrap/bootstrap.bundle.min.js"></script>
+  <script>
+    function showAbout() {
+      const modal = new bootstrap.Modal(document.getElementById('aboutModal'));
+      modal.show();
+    }
+  </script>
+</body>
+</html>
