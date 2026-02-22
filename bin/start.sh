@@ -47,6 +47,21 @@ sed -i "s/port=\"8080\"/port=\"$PORT\"/g" tomcat/conf/server.xml
 
 echo "Tomcat configured to run on port $PORT"
 
+# DEBUG: Print all environment variables that might be used
+echo "===== Environment Variables ====="
+echo "MYSQL_HOST: ${MYSQL_HOST:-NOT SET}"
+echo "MYSQL_PORT: ${MYSQL_PORT:-NOT SET}"
+echo "MYSQL_DATABASE: ${MYSQL_DATABASE:-NOT SET}"
+echo "MYSQL_USER: ${MYSQL_USER:-NOT SET}"
+echo "MYSQL_PASSWORD: ${MYSQL_PASSWORD:+SET}"
+echo "DB_HOST: ${DB_HOST:-NOT SET}"
+echo "DB_PORT: ${DB_PORT:-NOT SET}"
+echo "DB_NAME: ${DB_NAME:-NOT SET}"
+echo "DB_USER: ${DB_USER:-NOT SET}"
+echo "RAILWAY_PRIVATE_DOMAIN: ${RAILWAY_PRIVATE_DOMAIN:-NOT SET}"
+echo "RAILWAY_STATIC_URL: ${RAILWAY_STATIC_URL:-NOT SET}"
+echo "===== End Environment ====="
+
 # Set memory settings (good for Railway free plan)
 export JAVA_OPTS="-Xms128m -Xmx256m"
 
