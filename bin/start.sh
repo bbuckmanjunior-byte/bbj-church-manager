@@ -64,16 +64,11 @@ echo "MYSQL_USER=$MYSQL_USER"
 # Set memory settings
 export JAVA_OPTS="-Xms128m -Xmx256m"
 
-# Create setenv.sh so catalina.sh automatically sources it with database config
-# This is more reliable than passing through environment variables
-mkdir -p tomcat/bin
-cat > tomcat/bin/setenv.sh << SETENV_EOF
-#!/bin/bash
-CATALINA_OPTS="-Djava.net.preferIPv4Stack=true -Ddb.host=$MYSQL_HOST -Ddb.port=$MYSQL_PORT -Ddb.name=$MYSQL_DATABASE -Ddb.user=$MYSQL_USER -Ddb.password=$MYSQL_PASSWORD"
-export CATALINA_OPTS
-SETENV_EOF
-
-chmod +x tomcat/bin/setenv.sh
+echo "Database environment variables available:"
+echo "MYSQLHOST=$MYSQLHOST"
+echo "MYSQLPORT=$MYSQLPORT"
+echo "MYSQLDATABASE=$MYSQLDATABASE"
+echo "MYSQLUSER=$MYSQLUSER"
 
 echo "Starting Tomcat..."
 
