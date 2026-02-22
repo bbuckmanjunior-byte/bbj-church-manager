@@ -24,7 +24,7 @@ public class DatabaseConnection {
             // Defaults for local testing
             if (host == null || host.isEmpty()) host = "localhost";
             if (port == null || port.isEmpty()) port = "3306";
-            if (database == null || database.isEmpty()) database = "railway";
+            if (database == null || database.isEmpty()) database = "BBJDigital_DB";
             if (user == null || user.isEmpty()) user = "root";
             if (password == null) password = ""; // Allow empty password
 

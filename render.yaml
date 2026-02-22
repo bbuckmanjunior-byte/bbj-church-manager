@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: bbj-church-manager
+    env: docker
+    plan: standard
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: MYSQLHOST
+        sync: false
+      - key: MYSQLPORT
+        value: 3306
+      - key: MYSQLDATABASE
+        sync: false
+      - key: MYSQLUSER
+        sync: false
+      - key: MYSQLPASSWORD
+        sync: false
+      - key: CLOUDINARY_URL
+        sync: false
+    healthCheckPath: /
+    preDeployCommand: "mvn clean package -DskipTests"
+    maxShutdownDelay: 30

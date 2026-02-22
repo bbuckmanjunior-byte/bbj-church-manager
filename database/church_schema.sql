@@ -1,7 +1,10 @@
--- Schema for fresh BBJ Digital Church Manager
-DROP DATABASE IF EXISTS church_manager;
-CREATE DATABASE church_manager;
-USE church_manager;
+-- Schema for BBJ Digital Church Manager - TiDB Cloud
+-- Database: BBJDigital_DB
+-- Compatible with: TiDB Cloud, MySQL 8.0+, Render
+
+DROP DATABASE IF EXISTS BBJDigital_DB;
+CREATE DATABASE BBJDigital_DB;
+USE BBJDigital_DB;
 
 CREATE TABLE users (
   id INT PRIMARY KEY AUTO_INCREMENT,
@@ -98,6 +101,19 @@ CREATE TABLE tabs (
 
 INSERT INTO users (username, password, email, first_name, last_name, gender, role, profile_complete, email_verified)
 VALUES ('admin@bbj.com', SHA2('admin123',256), 'admin@bbj.com', 'Admin', 'User', 'Other', 'admin', TRUE, TRUE);
+
+-- Create indexes for better query performance on TiDB Cloud
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_users_username ON users(username);
+CREATE INDEX idx_announcements_created_by ON announcements(created_by);
+CREATE INDEX idx_announcements_created_at ON announcements(created_at);
+CREATE INDEX idx_events_created_by ON events(created_by);
+CREATE INDEX idx_events_event_date ON events(event_date);
+CREATE INDEX idx_sermons_uploaded_by ON sermons(uploaded_by);
+CREATE INDEX idx_sermons_created_at ON sermons(created_at);
+CREATE INDEX idx_member_profiles_user_id ON member_profiles(user_id);
+CREATE INDEX idx_verification_tokens_user_id ON verification_tokens(user_id);
+CREATE INDEX idx_password_reset_tokens_user_id ON password_reset_tokens(user_id);
 
 INSERT INTO tabs (name, display_label, icon, visible_to, display_order) VALUES
 ('announcements', 'Announcements', '📢', 'all', 1),
