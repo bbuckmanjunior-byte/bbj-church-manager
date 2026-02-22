@@ -3,7 +3,7 @@ WORKDIR /app
 COPY pom.xml .
 COPY src ./src
 COPY WebContent ./WebContent
-RUN mvn clean package -DskipTests
+RUN mvn clean package -DskipTests -e
 
 FROM tomcat:8.5-jdk8-openjdk-slim
 RUN rm -rf /usr/local/tomcat/webapps/ROOT
