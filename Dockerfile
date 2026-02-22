@@ -1,18 +1,30 @@
-FROM maven:3.8.1-openjdk-11 as builder
+# Stage 1: Build the WAR using Maven
+FROM maven:3.9.3-eclipse-temurin-11 AS builder
+
+# Set working directory
 WORKDIR /app
+
+# Copy only the pom first to leverage Docker cache
 COPY pom.xml .
+# Copy the source code
 COPY src ./src
 COPY WebContent ./WebContent
 COPY bin ./bin
+
+# Build the project (skip tests for speed)
 RUN mvn clean package -DskipTests
 
-FROM eclipse-temurin:11-jre
-RUN apt-get update && apt-get install -y wget bash unzip && rm -rf /var/lib/apt/lists/*
+# Stage 2: Prepare the runtime with Tomcat
+FROM tomcat:9.0.85-jdk11
 
-WORKDIR /app
-COPY --from=builder /app/target/fresh_app-1.0.0.war ./target/
-COPY --from=builder /app/bin/start.sh ./bin/
-RUN chmod +x ./bin/start.sh
+# Remove default ROOT webapp
+RUN rm -rf /usr/local/tomcat/webapps/ROOT
 
-EXPOSE 8081
-CMD ["bash", "./bin/start.sh"]
+# Copy the WAR from the builder stage
+COPY --from=builder /app/target/*.war /usr/local/tomcat/webapps/ROOT.war
+
+# Expose Tomcat port
+EXPOSE 8080
+
+# Start Tomcat
+CMD ["catalina.sh", "run"]
