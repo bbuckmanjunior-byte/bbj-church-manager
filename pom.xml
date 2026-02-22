@@ -4,26 +4,29 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
          http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+    
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.7.14</version>
+        <relativePath/> 
+    </parent>
 
     <groupId>com.bbj</groupId>
     <artifactId>fresh_app</artifactId>
     <version>1.0.0</version>
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
     <name>BBJ Digital Church Manager</name>
 
     <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.version>1.8</java.version>
     </properties>
 
     <dependencies>
-        <!-- Servlet API -->
+        <!-- Spring Boot Tomcat Web Starter -->
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-            <version>2.5</version>
-            <scope>provided</scope>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
         <!-- MySQL Connector -->
@@ -52,9 +55,6 @@
             <version>2.13.0</version>
         </dependency>
 
-        <!-- (Optional) Firebase Admin SDK - removed in favor of Cloudinary for production-free tier -->
-        <!-- If you still want Firebase, re-add the dependency here -->
-        
         <!-- Cloudinary Java SDK -->
         <dependency>
             <groupId>com.cloudinary</groupId>
@@ -77,15 +77,10 @@
                 </configuration>
             </plugin>
 
-            <!-- WAR Plugin -->
+            <!-- Spring Boot Maven Plugin - Creates executable JAR -->
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-war-plugin</artifactId>
-                <version>3.3.1</version>
-                <configuration>
-                    <webXml>WebContent/WEB-INF/web.xml</webXml>
-                    <warSourceDirectory>WebContent</warSourceDirectory>
-                </configuration>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
