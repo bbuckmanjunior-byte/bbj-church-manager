@@ -33,8 +33,13 @@
     </div>
 
     <div class="row mb-4">
-      <div class="col-12">
+      <div class="col-md-9">
         <input type="text" id="searchInput" class="form-control" placeholder="🔍 Search members by name or phone...">
+      </div>
+      <div class="col-md-3">
+        <button id="exportBtn" onclick="exportMembers()" class="btn btn-success w-100" style="display:none;">
+          <i class="bi bi-download"></i> Export to Excel
+        </button>
       </div>
     </div>
 
@@ -62,6 +67,14 @@
         brandLink.href = 'admin-dashboard.html';
       } else {
         brandLink.href = 'member-dashboard.html';
+      }
+      
+      // Show/hide export button based on admin status
+      const exportBtn = document.getElementById('exportBtn');
+      if (isAdmin) {
+        exportBtn.style.display = 'block';
+      } else {
+        exportBtn.style.display = 'none';
       }
     })();
 
@@ -137,6 +150,46 @@
           }
         }).catch(e => alert('✗ Error: ' + e.message));
       }
+    }
+
+    function exportMembers() {
+      if (!isAdmin) {
+        alert('Only admins can export members');
+        return;
+      }
+      
+      const exportBtn = document.getElementById('exportBtn');
+      const originalText = exportBtn.innerHTML;
+      exportBtn.disabled = true;
+      exportBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Exporting...';
+      
+      fetch('export-members')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Export failed: ' + response.statusText);
+          }
+          return response.blob();
+        })
+        .then(blob => {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'Members_' + new Date().toISOString().slice(0, 19).replace(/:/g, '-') + '.xlsx';
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+          
+          exportBtn.disabled = false;
+          exportBtn.innerHTML = originalText;
+          alert('✓ Members exported successfully!');
+        })
+        .catch(error => {
+          console.error('Export error:', error);
+          exportBtn.disabled = false;
+          exportBtn.innerHTML = originalText;
+          alert('✗ Error exporting members: ' + error.message);
+        });
     }
 
     // Search functionality

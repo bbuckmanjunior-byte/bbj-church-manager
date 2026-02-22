@@ -155,6 +155,15 @@
     <url-pattern>/admin-management</url-pattern>
   </servlet-mapping>
 
+  <servlet>
+    <servlet-name>ExportMembersServlet</servlet-name>
+    <servlet-class>com.bbj.servlets.ExportMembersServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>ExportMembersServlet</servlet-name>
+    <url-pattern>/export-members</url-pattern>
+  </servlet-mapping>
+
   <welcome-file-list>
     <welcome-file>index.html</welcome-file>
   </welcome-file-list>
