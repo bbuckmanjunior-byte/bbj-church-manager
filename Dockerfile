@@ -7,7 +7,7 @@ COPY bin ./bin
 RUN mvn clean package -DskipTests
 
 FROM eclipse-temurin:11-jre
-RUN apt-get update && apt-get install -y wget bash && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y wget bash unzip && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 COPY --from=builder /app/target/fresh_app-1.0.0.war ./target/
