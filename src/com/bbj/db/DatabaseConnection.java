@@ -29,7 +29,7 @@ public class DatabaseConnection {
             if (password == null) password = ""; // Allow empty password
 
             String url = "jdbc:mysql://" + host + ":" + port + "/" + database
-                    + "?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
+                    + "?sslMode=VERIFY_IDENTITY&serverTimezone=UTC&enabledTLSProtocols=TLSv1.2,TLSv1.3";
 
             // Load the MySQL driver
             Class.forName("com.mysql.cj.jdbc.Driver");
