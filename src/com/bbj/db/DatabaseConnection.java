@@ -4,59 +4,49 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-import com.cloudinary.Cloudinary;
-import com.cloudinary.utils.ObjectUtils;
-
 public class DatabaseConnection {
 
+    private static Connection connection = null;
+
     public static Connection getConnection() throws SQLException {
-        Connection conn = null;
+        if (connection != null && !connection.isClosed()) {
+            return connection;
+        }
 
         try {
-            // Get environment variables
+            // Get environment variables (Railway, Docker, or local defaults)
             String host = System.getenv("MYSQLHOST");
             String port = System.getenv("MYSQLPORT");
             String database = System.getenv("MYSQLDATABASE");
             String user = System.getenv("MYSQLUSER");
             String password = System.getenv("MYSQLPASSWORD");
 
-            // Defaults if not set
-            if (host == null) host = "localhost";
-            if (port == null) port = "3306";
-            if (database == null) database = "railway";
-            if (user == null) user = "root";
-            if (password == null) password = "";
+            // Defaults for local testing
+            if (host == null || host.isEmpty()) host = "localhost";
+            if (port == null || port.isEmpty()) port = "3306";
+            if (database == null || database.isEmpty()) database = "railway";
+            if (user == null || user.isEmpty()) user = "root";
+            if (password == null) password = ""; // Allow empty password
 
             String url = "jdbc:mysql://" + host + ":" + port + "/" + database
-                    + "?useSSL=false&serverTimezone=UTC";
+                    + "?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
 
-            System.out.println("🌐 Connecting to MySQL at: " + url);
+            // Load the MySQL driver
+            Class.forName("com.mysql.cj.jdbc.Driver");
 
-            conn = DriverManager.getConnection(url, user, password);
+            connection = DriverManager.getConnection(url, user, password);
 
-            System.out.println("✅ Database connected successfully");
+            System.out.println("✅ Database connection successful!");
+            return connection;
 
-            // Optional: Check Cloudinary
-            String cloudinaryUrl = System.getenv("CLOUDINARY_URL");
-            if (cloudinaryUrl != null && !cloudinaryUrl.isEmpty()) {
-                Cloudinary cloudinary = new Cloudinary(cloudinaryUrl);
-                try {
-                    // Simple test: get configuration
-                    cloudinary.config.getApiKey();
-                    System.out.println("☁️ Cloudinary connected successfully");
-                } catch (Exception e) {
-                    System.out.println("⚠️ Cloudinary connection failed: " + e.getMessage());
-                }
-            } else {
-                System.out.println("⚠️ CLOUDINARY_URL not set");
-            }
-
-            return conn;
-
-        } catch (Exception e) {
-            System.out.println("❌ Database Connection Failed");
+        } catch (ClassNotFoundException e) {
+            System.err.println("❌ MySQL JDBC Driver not found");
             e.printStackTrace();
-            throw new SQLException("Database connection failed: " + e.getMessage(), e);
+            throw new SQLException("Driver not found", e);
+        } catch (SQLException e) {
+            System.err.println("❌ Database connection failed");
+            e.printStackTrace();
+            throw e;
         }
     }
 }
