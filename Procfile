@@ -1,1 +1,2 @@
-web: java -jar target/fresh_app-1.0.0.jar --server.port=$PORT
+release: mvn clean package -DskipTests
+web: bash bin/start.sh
