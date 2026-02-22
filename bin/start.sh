@@ -1,40 +1,59 @@
 #!/bin/bash
 set -e
 
-# Get PORT from environment variable or default to 8080
-PORT=${PORT:-8080}
+echo "===== Railway Tomcat Startup ====="
 
-# Verify WAR was built
+# Use Railway PORT or default to 8080
+PORT=${PORT:-8080}
+echo "Using PORT: $PORT"
+
+# Check if WAR exists
 if [ ! -f target/fresh_app-1.0.0.war ]; then
-    echo "ERROR: WAR file not found. Build may have failed."
+    echo "ERROR: WAR file not found!"
+    echo "Make sure Maven build ran successfully."
     exit 1
 fi
 
-# Download and setup Tomcat if not present
+echo "WAR file found."
+
+# Install Tomcat if not already installed
 if [ ! -d tomcat ]; then
-    echo "Setting up Apache Tomcat..."
-    mkdir -p tomcat
+    echo "Installing Apache Tomcat..."
+    mkdir tomcat
     cd tomcat
     wget -q https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.85/bin/apache-tomcat-9.0.85.tar.gz
     tar xzf apache-tomcat-9.0.85.tar.gz --strip-components=1
     rm apache-tomcat-9.0.85.tar.gz
-    rm -rf webapps/ROOT
     cd ..
-    echo "Tomcat setup complete"
+    echo "Tomcat installed."
 fi
 
-# Deploy WAR to Tomcat
-echo "Deploying application..."
+# Clean old deployment
+echo "Cleaning old deployment..."
+rm -rf tomcat/webapps/ROOT
 mkdir -p tomcat/webapps/ROOT
+
+# Deploy WAR
+echo "Deploying WAR..."
 cd target
-unzip -q fresh_app-1.0.0.war -d ../tomcat/webapps/ROOT
+unzip -oq fresh_app-1.0.0.war -d ../tomcat/webapps/ROOT
 cd ..
 
-# Set Tomcat port and start
-echo "Starting application on port $PORT..."
-export CATALINA_OPTS="-Djava.net.preferIPv4Stack=true"
-export JPDA_ADDRESS=$PORT
-export SERVER_PORT=$PORT
+echo "WAR deployed."
 
-# Start Tomcat in foreground
+# Configure Railway PORT in Tomcat
+echo "Configuring Tomcat port..."
+sed -i "s/port=\"8080\"/port=\"$PORT\"/g" tomcat/conf/server.xml
+
+echo "Tomcat configured to run on port $PORT"
+
+# Set memory settings (good for Railway free plan)
+export JAVA_OPTS="-Xms128m -Xmx256m"
+
+# Extra stability options
+export CATALINA_OPTS="-Djava.net.preferIPv4Stack=true"
+
+echo "Starting Tomcat..."
+
+# Start Tomcat in foreground (required by Railway)
 exec tomcat/bin/catalina.sh run
