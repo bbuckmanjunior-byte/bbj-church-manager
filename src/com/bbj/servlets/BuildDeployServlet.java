@@ -15,7 +15,8 @@ import java.time.format.DateTimeFormatter;
 
 /**
  * Servlet to handle build and deploy requests from admin dashboard.
- * Runs Maven build, stops Tomcat, copies WAR, and restarts Tomcat.
+ * In cloud environments (Railway/Heroku), deployment is handled by git push.
+ * In local development, provides build instructions.
  */
 public class BuildDeployServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -39,58 +40,55 @@ public class BuildDeployServlet extends HttpServlet {
         
         StringBuilder output = new StringBuilder();
         try {
-            output.append(timestamp()).append("Starting build and deploy process...\n");
+            // Detect environment
+            boolean isCloudEnv = System.getenv("RAILWAY_ENVIRONMENT") != null || 
+                               System.getenv("DYNO") != null ||
+                               System.getenv("HEROKU_DYNO_TYPE") != null;
             
-            // Step 1: Build with Maven
-            output.append(timestamp()).append("Running Maven build...\n");
-            String buildOutput = runCommand(new String[]{"mvn", "clean", "package", "-q"}, 
-                "c:\\Users\\Buckman\\Desktop\\BBJDigitalChurchManager\\fresh_app");
-            output.append(buildOutput);
+            output.append(timestamp()).append("Build and Deploy Information\n");
+            output.append("----------------------------\n");
             
-            // Step 2: Check if WAR was created
-            String warPath = "c:\\Users\\Buckman\\Desktop\\BBJDigitalChurchManager\\fresh_app\\target\\fresh_app-1.0.0.war";
-            if (!Files.exists(Paths.get(warPath))) {
-                output.append(timestamp()).append("ERROR: WAR file not created at ").append(warPath).append("\n");
-                response.getWriter().print("{\"output\":\"" + escapeJson(output.toString()) + "\"}");
-                return;
+            if (isCloudEnv) {
+                // Cloud environment (Railway, Heroku, etc.)
+                output.append(timestamp()).append("✓ Cloud environment detected\n");
+                output.append(timestamp()).append("Deployment is automatic via Git push:\n");
+                output.append("  1. Commit your changes: git add . && git commit -m \"your message\"\n");
+                output.append("  2. Push to main: git push\n");
+                output.append("  3. Cloud platform automatically builds and deploys\n");
+                output.append(timestamp()).append("To view logs: Check your cloud platform dashboard\n");
+                response.getWriter().print("{\"status\":\"running_on_cloud\",\"output\":\"" + escapeJson(output.toString()) + "\"}");
+            } else {
+                // Local development
+                output.append(timestamp()).append("✓ Local development environment\n");
+                output.append(timestamp()).append("Running Maven build...\n");
+                
+                String buildOutput = runCommand(new String[]{"mvn", "clean", "package", "-q"});
+                output.append(buildOutput);
+                
+                // Check if WAR was created
+                if (Files.exists(Paths.get("target/fresh_app-1.0.0.war"))) {
+                    output.append(timestamp()).append("✓ WAR created successfully\n");
+                    output.append(timestamp()).append("WAR is ready for local deployment\n");
+                    output.append(timestamp()).append("To restart local Tomcat:\n");
+                    output.append("  1. Stop Tomcat: taskkill /F /IM java.exe\n");
+                    output.append("  2. Copy WAR to Tomcat webapps\n");
+                    output.append("  3. Restart Tomcat\n");
+                } else {
+                    output.append(timestamp()).append("ERROR: WAR file not created\n");
+                }
+                
+                response.getWriter().print("{\"status\":\"local_build\",\"output\":\"" + escapeJson(output.toString()) + "\"}");
             }
-            output.append(timestamp()).append("✓ WAR created successfully\n");
-            
-            // Step 3: Stop Tomcat
-            output.append(timestamp()).append("Stopping Tomcat...\n");
-            String stopOutput = runCommand(new String[]{"taskkill", "/F", "/IM", "java.exe"}, null);
-            output.append(timestamp()).append("✓ Tomcat stopped\n");
-            Thread.sleep(1000); // Give Tomcat time to shut down
-            
-            // Step 4: Copy WAR to Tomcat
-            output.append(timestamp()).append("Copying WAR to Tomcat webapps...\n");
-            String deployTarget = "c:\\apache-tomcat-9.0\\webapps\\fresh_app.war";
-            Files.copy(Paths.get(warPath), Paths.get(deployTarget), 
-                java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-            output.append(timestamp()).append("✓ WAR deployed to Tomcat\n");
-            
-            // Step 5: Start Tomcat
-            output.append(timestamp()).append("Starting Tomcat...\n");
-            ProcessBuilder pb = new ProcessBuilder("cmd", "/c", "c:\\apache-tomcat-9.0\\bin\\startup.bat");
-            pb.start();
-            Thread.sleep(3000); // Wait for Tomcat to start
-            output.append(timestamp()).append("✓ Tomcat started\n");
-            
-            output.append(timestamp()).append("Build and deploy completed successfully!\n");
-            response.getWriter().print("{\"output\":\"" + escapeJson(output.toString()) + "\"}");
             
         } catch (Exception e) {
             output.append(timestamp()).append("ERROR: ").append(e.getMessage()).append("\n");
-            response.getWriter().print("{\"output\":\"" + escapeJson(output.toString()) + "\",\"error\":\"" 
-                + escapeJson(e.toString()) + "\"}");
+            response.getWriter().print("{\"error\":\"" + escapeJson(e.toString()) + "\"}");
         }
     }
     
-    private String runCommand(String[] command, String workDir) throws Exception {
+    
+    private String runCommand(String[] command) throws Exception {
         ProcessBuilder pb = new ProcessBuilder(command);
-        if (workDir != null) {
-            pb.directory(new java.io.File(workDir));
-        }
         pb.redirectErrorStream(true);
         Process process = pb.start();
         
@@ -104,7 +102,7 @@ public class BuildDeployServlet extends HttpServlet {
         
         int exitCode = process.waitFor();
         if (exitCode != 0) {
-            output.append("Command exited with code ").append(exitCode).append("\n");
+            output.append(timestamp()).append("Command exited with code ").append(exitCode).append("\n");
         }
         return output.toString();
     }
