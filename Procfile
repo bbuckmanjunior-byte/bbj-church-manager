@@ -1,2 +1,2 @@
 release: mvn clean package -DskipTests
-web: bash bin/start.sh
+web: java -Dserver.port=$PORT -jar target/fresh_app-1.0.0.war
