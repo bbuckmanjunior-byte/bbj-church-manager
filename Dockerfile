@@ -6,7 +6,7 @@ COPY WebContent ./WebContent
 COPY bin ./bin
 RUN mvn clean package -DskipTests
 
-FROM openjdk:11-jre-slim
+FROM eclipse-temurin:11-jre
 RUN apt-get update && apt-get install -y wget bash && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
