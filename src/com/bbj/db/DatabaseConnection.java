@@ -4,40 +4,56 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
+
 public class DatabaseConnection {
 
     public static Connection getConnection() throws SQLException {
+        Connection conn = null;
 
         try {
-            // Try using full JDBC URL first (Railway preferred)
-            String jdbcUrl = System.getenv("MYSQL_URL");
-            String user = System.getenv("MYSQLUSER");
-            String password = System.getenv("MYSQLPASSWORD");
-
-            if (jdbcUrl != null && !jdbcUrl.isEmpty()) {
-                System.out.println("✅ Using MYSQL_URL for connection: " + jdbcUrl);
-                return DriverManager.getConnection(jdbcUrl, user, password);
-            }
-
-            // Fallback: build URL manually
+            // Get environment variables
             String host = System.getenv("MYSQLHOST");
             String port = System.getenv("MYSQLPORT");
             String database = System.getenv("MYSQLDATABASE");
+            String user = System.getenv("MYSQLUSER");
+            String password = System.getenv("MYSQLPASSWORD");
 
-            if (host == null || host.isEmpty()) host = "localhost";
-            if (port == null || port.isEmpty()) port = "3306";
-            if (database == null || database.isEmpty()) database = "railway";
-            if (user == null || user.isEmpty()) user = "root";
+            // Defaults if not set
+            if (host == null) host = "localhost";
+            if (port == null) port = "3306";
+            if (database == null) database = "railway";
+            if (user == null) user = "root";
             if (password == null) password = "";
 
             String url = "jdbc:mysql://" + host + ":" + port + "/" + database
                     + "?useSSL=false&serverTimezone=UTC";
 
-            System.out.println("✅ Connecting using fallback URL: " + url);
+            System.out.println("🌐 Connecting to MySQL at: " + url);
 
-            return DriverManager.getConnection(url, user, password);
+            conn = DriverManager.getConnection(url, user, password);
 
-        } catch (SQLException e) {
+            System.out.println("✅ Database connected successfully");
+
+            // Optional: Check Cloudinary
+            String cloudinaryUrl = System.getenv("CLOUDINARY_URL");
+            if (cloudinaryUrl != null && !cloudinaryUrl.isEmpty()) {
+                Cloudinary cloudinary = new Cloudinary(cloudinaryUrl);
+                try {
+                    // Simple test: get configuration
+                    cloudinary.config.getApiKey();
+                    System.out.println("☁️ Cloudinary connected successfully");
+                } catch (Exception e) {
+                    System.out.println("⚠️ Cloudinary connection failed: " + e.getMessage());
+                }
+            } else {
+                System.out.println("⚠️ CLOUDINARY_URL not set");
+            }
+
+            return conn;
+
+        } catch (Exception e) {
             System.out.println("❌ Database Connection Failed");
             e.printStackTrace();
             throw new SQLException("Database connection failed: " + e.getMessage(), e);
