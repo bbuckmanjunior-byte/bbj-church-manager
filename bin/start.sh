@@ -47,12 +47,13 @@ sed -i "s/port=\"8080\"/port=\"$PORT\"/g" tomcat/conf/server.xml
 
 echo "Tomcat configured to run on port $PORT"
 
-# Export DATABASE environment variables so Java can access them
-export MYSQL_HOST="${MYSQL_HOST:-localhost}"
-export MYSQL_PORT="${MYSQL_PORT:-3306}"
-export MYSQL_DATABASE="${MYSQL_DATABASE:-railway}"
-export MYSQL_USER="${MYSQL_USER:-root}"
-export MYSQL_PASSWORD="${MYSQL_PASSWORD:-}"
+# Set database environment variables as Java system properties
+# This ensures Java can access them via System.getProperty()
+MYSQL_HOST="${MYSQL_HOST:-localhost}"
+MYSQL_PORT="${MYSQL_PORT:-3306}"
+MYSQL_DATABASE="${MYSQL_DATABASE:-railway}"
+MYSQL_USER="${MYSQL_USER:-root}"
+MYSQL_PASSWORD="${MYSQL_PASSWORD:-}"
 
 echo "Database configuration:"
 echo "MYSQL_HOST=$MYSQL_HOST"
@@ -60,11 +61,11 @@ echo "MYSQL_PORT=$MYSQL_PORT"
 echo "MYSQL_DATABASE=$MYSQL_DATABASE"
 echo "MYSQL_USER=$MYSQL_USER"
 
-# Set memory settings (good for Railway free plan)
+# Set memory settings and pass database config as system properties
 export JAVA_OPTS="-Xms128m -Xmx256m"
 
-# Extra stability options
-export CATALINA_OPTS="-Djava.net.preferIPv4Stack=true"
+# Pass database config as Java system properties for DatabaseConnection to use
+export CATALINA_OPTS="-Djava.net.preferIPv4Stack=true -Ddb.host=$MYSQL_HOST -Ddb.port=$MYSQL_PORT -Ddb.name=$MYSQL_DATABASE -Ddb.user=$MYSQL_USER -Ddb.password=$MYSQL_PASSWORD"
 
 echo "Starting Tomcat..."
 

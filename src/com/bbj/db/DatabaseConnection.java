@@ -14,21 +14,22 @@ public class DatabaseConnection {
             throw new SQLException("JDBC Driver not found", e);
         }
         
-        java.util.function.Function<String[], String> firstEnv = (keys) -> {
-            for (String k : keys) {
-                String v = System.getenv(k);
-                if (v != null && !v.isEmpty() && !v.contains("$")) return v;
-            }
-            return null;
-        };
+        // Try to read from Java system properties first (passed via CATALINA_OPTS)
+        // Fall back to environment variables, then to defaults
+        String dbHost = System.getProperty("db.host");
+        String dbPort = System.getProperty("db.port");
+        String dbName = System.getProperty("db.name");
+        String dbUser = System.getProperty("db.user");
+        String dbPassword = System.getProperty("db.password");
+        
+        // If system properties not set, try environment variables
+        if (dbHost == null) dbHost = System.getenv("MYSQL_HOST");
+        if (dbPort == null) dbPort = System.getenv("MYSQL_PORT");
+        if (dbName == null) dbName = System.getenv("MYSQL_DATABASE");
+        if (dbUser == null) dbUser = System.getenv("MYSQL_USER");
+        if (dbPassword == null) dbPassword = System.getenv("MYSQL_PASSWORD");
 
-        String dbUser = firstEnv.apply(new String[]{"MYSQL_USER", "DB_USER"});
-        String dbPassword = firstEnv.apply(new String[]{"MYSQL_PASSWORD", "DB_PASSWORD"});
-        String dbHost = firstEnv.apply(new String[]{"MYSQL_HOST", "DB_HOST"});
-        String dbPort = firstEnv.apply(new String[]{"MYSQL_PORT", "DB_PORT"});
-        String dbName = firstEnv.apply(new String[]{"MYSQL_DATABASE", "DB_NAME"});
-
-        // Normalize defaults
+        // Set defaults if still not found
         if (dbName == null) dbName = "railway";
         if (dbUser == null) dbUser = "root";
         if (dbPassword == null) dbPassword = "";
