@@ -69,6 +69,13 @@ public class DatabaseConnection {
             dbUrl = "jdbc:mysql://" + dbHost + ":" + dbPort + "/" + dbName + "?useSSL=false&serverTimezone=UTC";
         }
 
+        // DEBUG: Log the connection parameters
+        System.out.println("===== DATABASE CONNECTION DEBUG =====");
+        System.out.println("URL: " + dbUrl);
+        System.out.println("User: " + dbUser);
+        System.out.println("Password: " + (dbPassword != null && dbPassword.length() > 0 ? "SET" : "NOT SET"));
+        System.out.println("====================================");
+
         return DriverManager.getConnection(dbUrl, dbUser, dbPassword);
     }
 }
