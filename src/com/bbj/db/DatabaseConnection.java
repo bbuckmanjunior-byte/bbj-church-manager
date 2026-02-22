@@ -14,15 +14,61 @@ public class DatabaseConnection {
             throw new SQLException("JDBC Driver not found", e);
         }
         
-        // Get database credentials from environment variables (Railway) or use local defaults
-        String dbHost = System.getenv("DB_HOST") != null ? System.getenv("DB_HOST") : "localhost";
-        String dbPort = System.getenv("DB_PORT") != null ? System.getenv("DB_PORT") : "1532";
-        String dbName = System.getenv("DB_NAME") != null ? System.getenv("DB_NAME") : "church_manager";
-        String dbUser = System.getenv("DB_USER") != null ? System.getenv("DB_USER") : "root";
-        String dbPassword = System.getenv("DB_PASSWORD") != null ? System.getenv("DB_PASSWORD") : "fire@1532";
-        
-        String DB_URL = "jdbc:mysql://" + dbHost + ":" + dbPort + "/" + dbName + "?useSSL=false&serverTimezone=UTC";
-        
-        return DriverManager.getConnection(DB_URL, dbUser, dbPassword);
+        // Resolve database configuration from environment variables.
+        // Priority:
+        // 1) Explicit JDBC URL via MYSQL_URL / MYSQL_PUBLIC_URL / DB_URL
+        // 2) Component env vars: MYSQL_* or DB_* (multiple name variants supported)
+        // 3) Local defaults (kept as before for local dev)
+
+        // Helper to return the first non-empty env value for provided keys
+        java.util.function.Function<String[], String> firstEnv = (keys) -> {
+            for (String k : keys) {
+                String v = System.getenv(k);
+                if (v != null && !v.isEmpty()) return v;
+            }
+            return null;
+        };
+
+        // Check for full URL first (many providers expose MYSQL_URL)
+        String rawUrl = firstEnv.apply(new String[]{"MYSQL_URL", "MYSQL_PUBLIC_URL", "DB_URL", "MYSQLURL"});
+        String dbUrl;
+        String dbHost = null;
+        String dbPort = null;
+        String dbName = null;
+        String dbUser = null;
+        String dbPassword = null;
+
+        if (rawUrl != null && !rawUrl.isEmpty()) {
+            // Normalize to JDBC URL if necessary
+            if (rawUrl.startsWith("jdbc:")) {
+                dbUrl = rawUrl;
+            } else if (rawUrl.startsWith("mysql://") || rawUrl.startsWith("mariadb://")) {
+                dbUrl = "jdbc:" + rawUrl;
+            } else {
+                // Fallback - assume the value is a JDBC URL or already usable
+                dbUrl = rawUrl;
+            }
+
+            // Credentials may still be provided separately
+            dbUser = firstEnv.apply(new String[]{"MYSQL_USER", "MYSQLUSER", "DB_USER"});
+            dbPassword = firstEnv.apply(new String[]{"MYSQL_PASSWORD", "MYSQLPASSWORD", "MYSQL_ROOT_PASSWORD", "DB_PASSWORD"});
+        } else {
+            // No URL provided - read components (MYSQL_* then DB_* then defaults)
+            dbHost = firstEnv.apply(new String[]{"MYSQL_HOST", "MYSQLHOST", "DB_HOST"});
+            dbPort = firstEnv.apply(new String[]{"MYSQL_PORT", "MYSQLPORT", "DB_PORT"});
+            dbName = firstEnv.apply(new String[]{"MYSQL_DATABASE", "MYSQLDATABASE", "DB_NAME"});
+            dbUser = firstEnv.apply(new String[]{"MYSQL_USER", "MYSQLUSER", "DB_USER"});
+            dbPassword = firstEnv.apply(new String[]{"MYSQL_PASSWORD", "MYSQLPASSWORD", "MYSQL_ROOT_PASSWORD", "DB_PASSWORD"});
+
+            if (dbHost == null) dbHost = "localhost";
+            if (dbPort == null) dbPort = "1532";
+            if (dbName == null) dbName = "church_manager";
+            if (dbUser == null) dbUser = "root";
+            if (dbPassword == null) dbPassword = "fire@1532";
+
+            dbUrl = "jdbc:mysql://" + dbHost + ":" + dbPort + "/" + dbName + "?useSSL=false&serverTimezone=UTC";
+        }
+
+        return DriverManager.getConnection(dbUrl, dbUser, dbPassword);
     }
 }
