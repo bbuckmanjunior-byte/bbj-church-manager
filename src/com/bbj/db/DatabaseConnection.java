@@ -14,75 +14,95 @@ public class DatabaseConnection {
             throw new SQLException("JDBC Driver not found", e);
         }
         
-        // Resolve database configuration from environment variables.
         java.util.function.Function<String[], String> firstEnv = (keys) -> {
             for (String k : keys) {
                 String v = System.getenv(k);
-                if (v != null && !v.isEmpty()) return v;
+                if (v != null && !v.isEmpty() && !v.contains("$")) return v;
             }
             return null;
         };
 
-        // Check if Railway provides MYSQL_URL (public database URL)
-        String dbUrl = firstEnv.apply(new String[]{"MYSQL_URL", "MYSQL_PUBLIC_URL", "DATABASE_URL", "DB_URL"});
+        String dbUrl = null;
         String dbUser = firstEnv.apply(new String[]{"MYSQL_USER", "DB_USER"});
-        String dbPassword = firstEnv.apply(new String[]{"MYSQL_PASSWORD", "MYSQL_ROOT_PASSWORD", "DB_PASSWORD"});
+        String dbPassword = firstEnv.apply(new String[]{"MYSQL_PASSWORD", "DB_PASSWORD"});
 
-        if (dbUrl == null || dbUrl.isEmpty()) {
-            // No URL provided - build from components
-            String dbHost = firstEnv.apply(new String[]{"MYSQL_HOST", "DB_HOST"});
-            String dbPort = firstEnv.apply(new String[]{"MYSQL_PORT", "DB_PORT"});
-            String dbName = firstEnv.apply(new String[]{"MYSQL_DATABASE", "DB_NAME"});
+        // Try to build connection string by prioritizing public access
+        String dbHost = firstEnv.apply(new String[]{"MYSQL_HOST", "DB_HOST"});
+        String dbPort = firstEnv.apply(new String[]{"MYSQL_PORT", "DB_PORT"});
+        String dbName = firstEnv.apply(new String[]{"MYSQL_DATABASE", "DB_NAME"});
 
-            if (dbHost == null) dbHost = "localhost";
-            if (dbPort == null) dbPort = "3306";
-            if (dbName == null) dbName = "church_manager";
-            if (dbUser == null) dbUser = "root";
-            if (dbPassword == null) dbPassword = "fire@1532";
+        // Normalize defaults
+        if (dbName == null) dbName = "railway";
+        if (dbUser == null) dbUser = "root";
+        if (dbPassword == null) dbPassword = "";
+        if (dbPort == null) dbPort = "3306";
+        if (dbHost == null) dbHost = "localhost";
 
-            // Try public access first (if Railway sets RAILWAY_STATIC_URL)
-            String publicDomain = System.getenv("RAILWAY_STATIC_URL");
-            if (publicDomain != null && !publicDomain.isEmpty()) {
-                // Extract the domain without protocol/port
-                String domain = publicDomain.replace("https://", "").replace("http://", "").split(":")[0];
-                System.out.println("DEBUG: Attempting public domain connection to: " + domain);
-                dbUrl = "jdbc:mysql://" + domain + ":3306/" + dbName + "?useSSL=true&serverTimezone=UTC&allowPublicKeyRetrieval=true";
-            } else {
-                // Fall back to private domain
-                System.out.println("DEBUG: Attempting private domain connection to: " + dbHost);
-                dbUrl = "jdbc:mysql://" + dbHost + ":" + dbPort + "/" + dbName + "?useSSL=false&serverTimezone=UTC";
-            }
+        System.out.println("DEBUG: dbHost=" + dbHost + ", dbPort=" + dbPort + ", dbName=" + dbName);
+
+        // Railway MySQL connection - try multiple strategies
+        SQLException lastException = null;
+
+        // Strategy 1: Try private domain with retries
+        if (dbHost.contains("railway.internal")) {
+            dbUrl = "jdbc:mysql://" + dbHost + ":" + dbPort + "/" + dbName 
+                + "?useSSL=false&serverTimezone=UTC&connectTimeout=5000";
+            System.out.println("Strategy 1: Attempting private domain connection");
+            lastException = attemptConnection(dbUrl, dbUser, dbPassword, 3);
+            if (lastException == null) return DriverManager.getConnection(dbUrl, dbUser, dbPassword);
         }
 
-        // DEBUG: Log the connection parameters
-        System.out.println("===== DATABASE CONNECTION DEBUG =====");
-        System.out.println("URL: " + dbUrl);
-        System.out.println("User: " + dbUser);
-        System.out.println("Password: " + (dbPassword != null && dbPassword.length() > 0 ? "SET" : "NOT SET"));
-        System.out.println("====================================");
+        // Strategy 2: Try public proxy (if Rail way provides one via metadata)
+        // Extract just the subdomain from private domain for public proxy
+        if (dbHost.contains("railway.internal")) {
+            String projectName = dbHost.replace(".railway.internal", "").replace("${{RAILWAY_PRIVATE_DOMAIN}}", "bbjproject");
+            String publicProxy = projectName + ".proxy.railway.app";
+            dbUrl = "jdbc:mysql://" + publicProxy + ":3306/" + dbName
+                + "?useSSL=true&serverTimezone=UTC&connectTimeout=5000&allowPublicKeyRetrieval=true";
+            System.out.println("Strategy 2: Attempting public proxy connection to " + publicProxy);
+            lastException = attemptConnection(dbUrl, dbUser, dbPassword, 2);
+            if (lastException == null) return DriverManager.getConnection(dbUrl, dbUser, dbPassword);
+        }
 
-        // Add connection retry logic
-        SQLException lastException = null;
-        for (int attempt = 1; attempt <= 3; attempt++) {
+        // Strategy 3: Try localhost (for local development)
+        if (!dbHost.contains("railway")) {
+            dbUrl = "jdbc:mysql://localhost:3306/" + dbName
+                + "?useSSL=false&serverTimezone=UTC";
+            System.out.println("Strategy 3: Attempting localhost connection");
+            lastException = attemptConnection(dbUrl, dbUser, dbPassword, 2);
+            if (lastException == null) return DriverManager.getConnection(dbUrl, dbUser, dbPassword);
+        }
+
+        // All strategies failed
+        System.out.println("===== DATABASE CONNECTION FAILED =====");
+        System.out.println("All connection strategies failed");
+        System.out.println("Last error: " + (lastException != null ? lastException.getMessage() : "Unknown"));
+        System.out.println("=====================================");
+        
+        throw new SQLException("Unable to connect to database using any strategy", lastException);
+    }
+
+    private static SQLException attemptConnection(String url, String user, String password, int attempts) {
+        for (int i = 1; i <= attempts; i++) {
             try {
-                System.out.println("Database connection attempt " + attempt + "/3...");
-                Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
-                System.out.println("Successfully connected to database!");
-                return conn;
+                System.out.println("  Attempt " + i + "/" + attempts + ": " + url);
+                Connection conn = DriverManager.getConnection(url, user, password);
+                System.out.println("  SUCCESS! Connected to database");
+                conn.close(); // Just test the connection
+                return null;
             } catch (SQLException e) {
-                lastException = e;
-                System.out.println("Connection attempt " + attempt + " failed: " + e.getMessage());
-                if (attempt < 3) {
+                System.out.println("  Failed: " + e.getMessage());
+                if (i < attempts) {
                     try {
-                        Thread.sleep(2000); // Wait 2 seconds before retrying
+                        Thread.sleep(1500);
                     } catch (InterruptedException ie) {
                         Thread.currentThread().interrupt();
                     }
                 }
+                if (i == attempts) {
+                    return e;
+                }
             }
         }
-
-        // All retries failed
-        throw new SQLException("Failed to connect to database after 3 attempts", lastException);
-    }
+        return null;
 }
