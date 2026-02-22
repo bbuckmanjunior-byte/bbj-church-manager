@@ -1,2 +1,2 @@
-release: mvn clean package -DskipTests
-web: exec bash bin/start.sh
+release: mvn clean package -DskipTests && echo "Build complete"
+web: sh -c 'exec bash bin/start.sh'

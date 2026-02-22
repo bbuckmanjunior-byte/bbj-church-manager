@@ -3,7 +3,8 @@ builder = "nixpacks"
 buildCommand = "mvn clean package -DskipTests"
 
 [deploy]
-startCommand = "bash ./bin/start.sh"
+startCommand = "sh -c 'bash bin/start.sh'"
 restartPolicyMaxRetries = 5
 healthcheckPath = "/"
 healthcheckTimeout = 30
+healthcheckInterval = 10
