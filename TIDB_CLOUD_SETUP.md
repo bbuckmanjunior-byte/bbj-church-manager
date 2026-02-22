@@ -133,6 +133,21 @@ If you get connection errors:
    - Check you imported schema correctly
    - Try connecting directly via CLI to verify
 
+### TLS / CA certificate
+- If you see certificate validation errors when using `sslMode=VERIFY_IDENTITY`, your JVM may not trust the Let's Encrypt root that issued the TiDB Cloud certificate.
+- You can download the ISRG Root X1 certificate from https://letsencrypt.org/certs/isrgrootx1.pem and import it into a Java truststore.
+
+Import example (create a new truststore):
+```bash
+keytool -importcert -alias isrgrootx1 -file isrgrootx1.pem \
+   -keystore /path/to/truststore.jks -storepass changeit -noprompt
+
+# Start Java with the custom truststore:
+export JAVA_OPTS="-Djavax.net.ssl.trustStore=/path/to/truststore.jks -Djavax.net.ssl.trustStorePassword=changeit"
+```
+
+Note: The `database/isrgrootx1.pem` file has been removed from the repository to avoid tracking CA files. Download the up-to-date PEM from Let's Encrypt when needed.
+
 ### Performance Optimization
 - TiDB automatically optimizes queries
 - For large datasets, consider upgrading from Serverless to Dedicated
