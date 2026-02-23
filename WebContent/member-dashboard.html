@@ -84,16 +84,42 @@
       <div class="col-md-6 col-lg-4">
         <div class="card text-center">
           <div style="font-size:3rem;margin-bottom:1rem"><i class="bi bi-question-circle" style="font-size:3rem"></i></div>
-          <h3>Help</h3>
-          <p>Get support and information</p>
-          <a href="#" class="btn btn-primary btn-sm disabled">Coming Soon</a>
+          <h3>Help & Support</h3>
+          <p>Get support via WhatsApp</p>
+          <a href="https://wa.me/message/DMJE5W7QXC2MF1" target="_blank" class="btn btn-success btn-sm"><i class="bi bi-whatsapp"></i> WhatsApp</a>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="footer">
+  <div class="footer" style="margin-top:3rem;padding:2rem;text-align:center;border-top:1px solid #eee">
     <p>&copy; 2026 BBJ Digital Church Manager. All rights reserved.</p>
+    <a href="logout" style="color:#6366f1;text-decoration:none;font-weight:500;margin-top:1rem;display:inline-block"><i class="bi bi-box-arrow-right"></i> Logout</a>
+  </div>
+
+  <!-- Welcome Modal -->
+  <div class="modal fade" id="welcomeModal" tabindex="-1" backdrop="static" keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title"><i class="bi bi-hand-thumbs-up"></i> Welcome to BBJ Digital Church Manager!</h5>
+        </div>
+        <div class="modal-body">
+          <p style="font-size:1.1rem;margin-bottom:1.5rem"><strong>Your account has been successfully created!</strong></p>
+          <div style="background:#f0f4ff;padding:1.5rem;border-radius:8px;margin-bottom:1.5rem">
+            <p style="margin:0;color:#666;font-size:0.95rem">Your Login Email:</p>
+            <p style="margin:0.5rem 0 0 0;color:#6366f1;font-weight:700;font-size:1.2rem" id="welcomeEmail">--</p>
+          </div>
+          <p style="color:#666;margin-bottom:1rem"><strong>Use this email when logging in next time.</strong></p>
+          <div style="background:#fff3cd;padding:1rem;border-radius:6px;border-left:4px solid #ffc107">
+            <small style="color:#856404"><i class="bi bi-info-circle"></i> <strong>Tip:</strong> Save your email in your contacts for future reference.</small>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Got it, Let's Go!</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script src="lib/bootstrap/bootstrap.bundle.min.js"></script>
@@ -101,6 +127,7 @@
     async function refreshMemberDashboard() {
       const firstName = sessionStorage.getItem('firstName');
       const email = sessionStorage.getItem('email');
+      const showWelcome = sessionStorage.getItem('showWelcome');
 
       if (!firstName) {
         window.location.href = 'login.html';
@@ -109,6 +136,14 @@
 
       document.getElementById('memberName').textContent = firstName;
       if (email) document.getElementById('memberEmail').textContent = email;
+
+      // Show welcome modal for new registrations
+      if (showWelcome === 'true' && email) {
+        document.getElementById('welcomeEmail').textContent = email;
+        const welcomeModal = new bootstrap.Modal(document.getElementById('welcomeModal'));
+        welcomeModal.show();
+        sessionStorage.removeItem('showWelcome'); // Only show once
+      }
 
       try {
         const res = await fetch('member-info');

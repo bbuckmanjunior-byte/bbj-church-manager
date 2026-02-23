@@ -112,11 +112,19 @@ public class ProfileServlet extends HttpServlet {
                     
                     if (uploadedFile != null && fileName != null) {
                         try {
+                            System.out.println("Attempting to upload profile picture to Cloudinary...");
                             // Upload to Cloudinary
                             picturePath = CloudinaryStorageService.uploadProfilePicture(uploadedFile, fileName, userId);
+                            System.out.println("Picture uploaded successfully: " + picturePath);
                             updateSql += ", profile_picture=?";
-                        } catch (IOException e) {
-                            response.getWriter().println(new JSONObject().put("error", "Cloudinary upload failed: " + e.getMessage()).toString());
+                        } catch (Exception e) {
+                            System.err.println("Cloudinary upload failed: " + e.getMessage());
+                            e.printStackTrace();
+                            // Continue without picture if upload fails - don't block profile update
+                            JSONObject json = new JSONObject();
+                            json.put("success", false);
+                            json.put("error", "Picture upload failed: " + e.getMessage() + ". Profile data was updated but picture was not saved.");
+                            response.getWriter().println(json.toString());
                             return;
                         }
                     }

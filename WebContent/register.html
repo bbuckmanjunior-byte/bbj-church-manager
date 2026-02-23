@@ -174,16 +174,20 @@
 
         if (response.ok) {
           const data = await response.json();
+          // Store email in sessionStorage for welcome message
+          sessionStorage.setItem('email', data.email);
+          sessionStorage.setItem('showWelcome', 'true');
+          
           successAlert.innerHTML = `<div class="alert alert-success alert-dismissible fade show" role="alert">
             <strong>Registration Successful!</strong><br>
             Account created for <strong>${data.email}</strong><br>
-            <small>Redirecting to login...</small>
+            <small>Redirecting to dashboard...</small>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
           </div>`;
           successAlert.style.display = 'block';
           
           setTimeout(() => {
-            window.location.href = 'login.html';
+            window.location.href = 'member-dashboard.html';
           }, 2000);
         } else {
           const error = await response.json();

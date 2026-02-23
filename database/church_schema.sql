@@ -42,6 +42,7 @@ CREATE TABLE announcements (
   id INT PRIMARY KEY AUTO_INCREMENT,
   title VARCHAR(200) NOT NULL,
   content TEXT,
+  file_path VARCHAR(500),
   created_by INT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
@@ -53,6 +54,7 @@ CREATE TABLE events (
   event_date DATETIME,
   location VARCHAR(200),
   description TEXT,
+  file_path VARCHAR(500),
   created_by INT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
