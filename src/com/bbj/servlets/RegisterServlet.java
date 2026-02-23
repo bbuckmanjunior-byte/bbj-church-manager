@@ -110,11 +110,13 @@ public class RegisterServlet extends HttpServlet {
                 tps.executeUpdate();
                 tps.close();
 
-                // Return success with generated email and token (token is returned for testing/email simulation)
+                // Return success with generated email, token, and user info (token is returned for testing/email simulation)
                 response.setStatus(HttpServletResponse.SC_OK);
                 JSONObject json = new JSONObject();
                 json.put("success", true);
                 json.put("email", generatedEmail);
+                json.put("userId", userId);
+                json.put("firstName", firstName.trim());
                 json.put("verificationToken", token);
                 json.put("message", "Account created successfully! A verification token was generated.");
                 out.print(json);

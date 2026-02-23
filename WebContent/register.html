@@ -174,8 +174,11 @@
 
         if (response.ok) {
           const data = await response.json();
-          // Store email in sessionStorage for welcome message
+          // Store all necessary data in sessionStorage for dashboard
           sessionStorage.setItem('email', data.email);
+          sessionStorage.setItem('firstName', data.firstName);
+          sessionStorage.setItem('userId', data.userId);
+          sessionStorage.setItem('role', 'member');
           sessionStorage.setItem('showWelcome', 'true');
           
           successAlert.innerHTML = `<div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -188,7 +191,7 @@
           
           setTimeout(() => {
             window.location.href = 'member-dashboard.html';
-          }, 2000);
+          }, 1000);
         } else {
           const error = await response.json();
           errorAlert.innerHTML = `<div class="alert alert-danger alert-dismissible fade show" role="alert">
