@@ -19,7 +19,6 @@ import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Timestamp;
 import java.util.List;
 
 public class SermonServlet extends HttpServlet {
@@ -92,7 +91,6 @@ public class SermonServlet extends HttpServlet {
                 int userId = (int) session.getAttribute("userId");
                 String title = null;
                 String description = null;
-                String speaker = null;
                 String fileType = null;
                 long fileSize = 0;
                 String fileName = null;
@@ -108,7 +106,6 @@ public class SermonServlet extends HttpServlet {
                         String fieldValue = item.getString();
                         if ("title".equals(fieldName)) title = fieldValue;
                         else if ("description".equals(fieldName)) description = fieldValue;
-                        else if ("speaker".equals(fieldName)) speaker = fieldValue;
                     } else {
                         fileName = new File(item.getName()).getName();
                         fileType = item.getContentType();

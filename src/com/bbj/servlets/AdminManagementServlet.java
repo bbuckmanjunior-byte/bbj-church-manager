@@ -15,7 +15,6 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.json.JSONException;
 
 /**
  * Servlet to handle admin management operations.

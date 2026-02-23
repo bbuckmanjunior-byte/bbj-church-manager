@@ -43,10 +43,6 @@ public class CloudinaryStorageService {
             throw new IOException("File size exceeds 10MB limit");
         }
 
-        String ext = "";
-        int idx = originalFileName.lastIndexOf('.');
-        if (idx > 0) ext = originalFileName.substring(idx);
-
         String publicId = "profile-pictures/" + userId + "_" + UUID.randomUUID();
 
         Map<?,?> result = c.uploader().upload(bytes, ObjectUtils.asMap(

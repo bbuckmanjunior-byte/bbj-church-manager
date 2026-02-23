@@ -4,6 +4,29 @@
 CREATE DATABASE IF NOT EXISTS BBJDigital_DB;
 USE BBJDigital_DB;
 
+-- Create users table first (base table for all foreign keys)
+CREATE TABLE IF NOT EXISTS users (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  username VARCHAR(50) UNIQUE NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  email VARCHAR(150) UNIQUE,
+  first_name VARCHAR(100),
+  last_name VARCHAR(100),
+  gender VARCHAR(50),
+  phone VARCHAR(20),
+  address VARCHAR(255),
+  profile_picture VARCHAR(500),
+  role ENUM('admin','member') DEFAULT 'member',
+  profile_complete BOOLEAN DEFAULT FALSE,
+  email_verified BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Insert admin user if not exists
+INSERT INTO users (username, password, email, first_name, last_name, role, email_verified)
+SELECT 'admin', SHA2('admin123', 256), 'admin@bbj.com', 'Admin', 'User', 'admin', TRUE
+WHERE NOT EXISTS (SELECT 1 FROM users WHERE email='admin@bbj.com');
+
 CREATE TABLE IF NOT EXISTS member_profiles (
   id INT PRIMARY KEY AUTO_INCREMENT,
   user_id INT UNIQUE NOT NULL,

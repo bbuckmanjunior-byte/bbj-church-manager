@@ -92,7 +92,7 @@ public class RegisterServlet extends HttpServlet {
                 ps.setString(5, lastName.trim());
                 ps.setString(6, gender.trim());
                 ps.setString(7, phone.trim());
-                int updated = ps.executeUpdate();
+                ps.executeUpdate();
                 int userId = -1;
                 try (java.sql.ResultSet keys = ps.getGeneratedKeys()) {
                     if (keys.next()) userId = keys.getInt(1);
