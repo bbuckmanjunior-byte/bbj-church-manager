@@ -103,22 +103,20 @@ public class AnnouncementServlet extends HttpServlet {
             // Handle file upload
             handleMultipartUpload(request, response, session);
         } else {
-            // Handle regular form
+            // Handle regular form (text only)
             String title = request.getParameter("title");
             String content = request.getParameter("content");
             
-            if (title == null || title.trim().isEmpty() || content == null || content.trim().isEmpty()) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().print("{\"error\":\"Title and content are required\"}");
-                return;
-            }
+            // Allow empty text fields
+            title = title != null ? title.trim() : "";
+            content = content != null ? content.trim() : "";
             
             try (Connection conn = DatabaseConnection.getConnection()) {
                 int userId = (Integer) session.getAttribute("userId");
                 String sql = "INSERT INTO announcements (title, content, created_by) VALUES (?, ?, ?)";
                 PreparedStatement ps = conn.prepareStatement(sql);
-                ps.setString(1, title);
-                ps.setString(2, content);
+                ps.setString(1, title != null ? title : "");
+                ps.setString(2, content != null ? content : "");
                 ps.setInt(3, userId);
                 ps.executeUpdate();
                 
@@ -164,9 +162,13 @@ public class AnnouncementServlet extends HttpServlet {
                 }
             }
 
-            if (title == null || title.trim().isEmpty() || content == null || content.trim().isEmpty()) {
+            // Allow empty text if file is uploaded, but require at least one
+            String titleTrim = (title != null ? title.trim() : "");
+            String contentTrim = (content != null ? content.trim() : "");
+            
+            if (titleTrim.isEmpty() && contentTrim.isEmpty() && (uploadedFile == null || fileName == null)) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().print("{\"error\":\"Title and content are required\"}");
+                response.getWriter().print("{\"error\":\"Please provide either text content or upload a file\"}");
                 return;
             }
 
@@ -191,8 +193,8 @@ public class AnnouncementServlet extends HttpServlet {
                 int userId = (Integer) session.getAttribute("userId");
                 String sql = "INSERT INTO announcements (title, content, file_path, created_by) VALUES (?, ?, ?, ?)";
                 PreparedStatement ps = conn.prepareStatement(sql);
-                ps.setString(1, title);
-                ps.setString(2, content);
+                ps.setString(1, title != null ? title : "");
+                ps.setString(2, content != null ? content : "");
                 ps.setString(3, filePath);
                 ps.setInt(4, userId);
                 ps.executeUpdate();

@@ -104,24 +104,22 @@ public class EventServlet extends HttpServlet {
             // Handle file upload
             handleMultipartUpload(request, response, session);
         } else {
-            // Handle regular form
+            // Handle regular form (text only)
             String title = request.getParameter("title");
             String eventDate = request.getParameter("event_date");
             String location = request.getParameter("location");
             String description = request.getParameter("description");
             
-            if (title == null || title.trim().isEmpty() || eventDate == null || eventDate.trim().isEmpty()) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().print("{\"error\":\"Title and date are required\"}");
-                return;
-            }
+            // Allow empty text fields
+            title = title != null ? title.trim() : "";
+            eventDate = eventDate != null ? eventDate.trim() : "";
             
             try (Connection conn = DatabaseConnection.getConnection()) {
                 int userId = (Integer) session.getAttribute("userId");
                 String sql = "INSERT INTO events (title, event_date, location, description, created_by) VALUES (?, ?, ?, ?, ?)";
                 PreparedStatement ps = conn.prepareStatement(sql);
-                ps.setString(1, title);
-                ps.setString(2, eventDate);
+                ps.setString(1, title != null ? title : "");
+                ps.setString(2, eventDate != null ? eventDate : "");
                 ps.setString(3, location != null ? location : "");
                 ps.setString(4, description != null ? description : "");
                 ps.setInt(5, userId);
@@ -173,9 +171,13 @@ public class EventServlet extends HttpServlet {
                 }
             }
 
-            if (title == null || title.trim().isEmpty() || eventDate == null || eventDate.trim().isEmpty()) {
+            // Allow empty text if file is uploaded, but require at least one
+            String titleTrim = (title != null ? title.trim() : "");
+            String eventDateTrim = (eventDate != null ? eventDate.trim() : "");
+            
+            if (titleTrim.isEmpty() && eventDateTrim.isEmpty() && (uploadedFile == null || fileName == null)) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().print("{\"error\":\"Title and date are required\"}");
+                response.getWriter().print("{\"error\":\"Please provide either event details or upload a file\"}");
                 return;
             }
 
@@ -200,8 +202,8 @@ public class EventServlet extends HttpServlet {
                 int userId = (Integer) session.getAttribute("userId");
                 String sql = "INSERT INTO events (title, event_date, location, description, file_path, created_by) VALUES (?, ?, ?, ?, ?, ?)";
                 PreparedStatement ps = conn.prepareStatement(sql);
-                ps.setString(1, title);
-                ps.setString(2, eventDate);
+                ps.setString(1, title != null ? title : "");
+                ps.setString(2, eventDate != null ? eventDate : "");
                 ps.setString(3, location != null ? location : "");
                 ps.setString(4, description != null ? description : "");
                 ps.setString(5, filePath);
